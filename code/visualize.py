@@ -4,6 +4,7 @@ import os
 import random
 from glob import glob
 import pandas as pd
+import cv2
 
 data = "s3://ant-size/data/"
 
@@ -53,8 +54,8 @@ print('Dates filmed: '+str(len(df.date.unique())))
 images = []
 
 # select some random images
-for i in random.sample(range(0, len(files)), 10):
-  images.append(mpimg.imread(str(files[i])))
+for i in random.sample(range(0, len(file_list)), 10):
+  images.append(mpimg.imread(str(file_list[i])))
 
 plt.figure(figsize=(20,10))
 columns = 5
