@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import os
 import random
 from glob import glob
+import pandas as pd
 
 data = "s3://ant-size/data/"
 
