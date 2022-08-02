@@ -1,0 +1,10 @@
+antmulti/
+csv/
+frame_stills/
+misc/
+multi_animal/
+single_animal/
+videos/
+__pycache__/
+data/
+.DS_Store
