@@ -1,9 +1,7 @@
 import numpy as np
-import cv2
 import matplotlib.pyplot as plt
 import os
 import random
-from pathlib import Path
 from glob import glob
 
 data = "s3://ant-size/data/"
@@ -31,6 +29,18 @@ for f in file_list:
     object.append(f.split('_')[3])
     camera.append(f.split('_')[4])
     mass.append(float(f.split('_')[6]))
+
+data = {
+    'id1': id1,
+    'id2': id2,
+    'date': date,
+    'mass': mass,
+    'object': object,
+    'camera': camera,
+    'filename': fn,
+    }
+
+df = pd.DataFrame(data)
 
 print('Data Information\n')
 print('Images: '+str(len(file_list)))
