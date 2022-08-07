@@ -12,7 +12,7 @@ from torchvision.transforms import Compose, Resize, ToTensor
 from PIL import Image
 
 
-class CTDataset(Dataset):
+class SizeDataset(Dataset):
 
     def __init__(self, cfg, split='train'):
         '''
@@ -36,17 +36,16 @@ class CTDataset(Dataset):
         )
         
         meta = pd.read_csv(annoPath)
+        meta.reset_index()
 
-        #images = meta['filename']         # image id to filename lookup
-        #labels = [] # custom labelclass indices that start at zero
+        #images = dict([[i['id'], i['filename']] for i in meta.iterrows()])          # image id to filename lookup
+        #labels = dict([[c['id'], idx] for idx, c in enumerate(meta['cat'])]) # custom labelclass indices that start at zero
         
-        # since we're doing classification, we're just taking the first annotation per image and drop the rest
-        #images_covered = set()      # all those images for which we have already assigned a label
-        for row in meta.iterrows():   
+        for index, row in meta.iterrows():   
             # append image-label tuple to data
-            imgFileName = meta['filename']
-            labelIndex = meta['cat']
-            self.data.append([imgFileName, labelIndex])
+            imgFileName = row['filename']
+            labelIndex = row['cat']
+            self.data.append([str(imgFileName), labelIndex])
             #images_covered.add(imgID)       # make sure image is only added once to dataset
     
 

@@ -2,7 +2,7 @@
     Training script. Here, we load the training and validation datasets (and
     data loaders) and the model and train and validate the model accordingly.
 
-    2022 Benjamin Kellenberger
+    2022 Benjamin Kellenberger, edited by Natalie Imirzian
 '''
 
 import os
@@ -17,7 +17,7 @@ from torch.utils.data import DataLoader
 from torch.optim import SGD
 
 # let's import our own classes and functions!
-from dataset import CTDataset
+from dataset import SizeDataset
 from model import CustomResNet18
 
 
@@ -27,8 +27,7 @@ def create_dataloader(cfg, split='train'):
         Loads a dataset according to the provided split and wraps it in a
         PyTorch DataLoader object.
     '''
-    dataset_instance = CTDataset(cfg, split)        # create an object instance of our CTDataset class
-
+    dataset_instance = SizeDataset(cfg, split)        # create an object instance of our CTDataset class
     dataLoader = DataLoader(
             dataset=dataset_instance,
             batch_size=cfg['batch_size'],
@@ -219,7 +218,7 @@ def main():
     # Argument parser for command-line arguments:
     # python ct_classifier/train.py --config configs/exp_resnet18.yaml
     parser = argparse.ArgumentParser(description='Train deep learning model.')
-    parser.add_argument('--config', help='Path to config file', default='configs/exp_resnet18.yaml')
+    parser.add_argument('--config', help='Path to config file', default='configs/ant_size.yaml')
     args = parser.parse_args()
 
     # load config
