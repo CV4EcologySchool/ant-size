@@ -7,7 +7,7 @@ device: cuda
 num_workers: 4
 
 # dataset parameters
-data_root: /Users/nsi/Documents/ant-size/data
+data_root: /home/ubuntu/ant-size/data
 num_classes: 16
 
 # training hyperparameters
