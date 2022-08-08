@@ -7,7 +7,7 @@ device: cuda
 num_workers: 4
 
 # dataset parameters
-data_root: /data
+data_root: /data/antmass
 num_classes: 5
 
 # training hyperparameters
