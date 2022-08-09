@@ -32,22 +32,17 @@ class SizeDataset(Dataset):
         # load annotation file
         annoPath = os.path.join(
             self.data_root,
-            'train_ant_size.csv'
+            'train_ant_size.csv' if self.split=='train' else "val_ant_size.csv"
         )
         
         meta = pd.read_csv(annoPath)
         meta.reset_index()
 
-        #images = dict([[i['id'], i['filename']] for i in meta.iterrows()])          # image id to filename lookup
-        #labels = dict([[c['id'], idx] for idx, c in enumerate(meta['cat'])]) # custom labelclass indices that start at zero
-        
         for index, row in meta.iterrows():   
             # append image-label tuple to data
             imgFileName = row['filename']
             labelIndex = row['cat']
             self.data.append([str(imgFileName), labelIndex])
-            #images_covered.add(imgID)       # make sure image is only added once to dataset
-    
 
     def __len__(self):
         '''

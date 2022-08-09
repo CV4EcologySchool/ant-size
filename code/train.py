@@ -15,6 +15,10 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 from torch.optim import SGD
+from torch.utils.tensorboard import SummaryWriter 
+
+# show model progress on tensorboard
+writer = SummaryWriter()
 
 # let's import our own classes and functions!
 from dataset import SizeDataset
@@ -125,6 +129,8 @@ def train(cfg, dataLoader, model, optimizer):
 
         # loss
         loss = criterion(prediction, labels)
+
+        writer.add_scalar("Loss/train", loss, epoch)
 
         # backward pass (calculate gradients of current batch)
         loss.backward()
@@ -258,8 +264,8 @@ def main():
             'oa_val': oa_val
         }
         save_model(current_epoch, model, stats)
-    
-
+        
+    writer.flush()
     # That's all, folks!
         
 
