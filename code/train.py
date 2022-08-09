@@ -10,6 +10,7 @@ import argparse
 import yaml
 import glob
 from tqdm import trange
+import shutil
 
 import torch
 import torch.nn as nn
@@ -49,7 +50,7 @@ def create_outdir(cfg, folder):
     if not os.path.exists(folder):
         os.makedirs(folder)
     
-    os.system('cp ' + str(cfg) + ' ' + str(folder))
+    shutil.copy(cfg, folder)
 
 
 
@@ -238,7 +239,7 @@ def main():
     # python ct_classifier/train.py --config configs/exp_resnet18.yaml
     parser = argparse.ArgumentParser(description='Train deep learning model.')
     parser.add_argument('--config', help='Path to config file', default='../configs/ant_size.yaml')
-    parser.add_argument('--output', help='Path to output folder', default = '../experiments/')
+    parser.add_argument('--output', required=True, help='Path to output folder')
     args = parser.parse_args()
 
     # load config
