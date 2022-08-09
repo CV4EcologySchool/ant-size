@@ -248,7 +248,7 @@ def main():
 
     print(f'Saving results to "{args.output}"')
     outdir = args.output
-    create_outdir(cfg, outdir)
+    create_outdir(args.config, outdir)
 
     # check if GPU is available
     device = cfg['device']
