@@ -93,7 +93,7 @@ def setup_optimizer(cfg, model):
 
 
 
-def train(cfg, dataLoader, model, optimizer):
+def train(cfg, dataLoader, model, optimizer, epoch):
     '''
         Our actual training function.
     '''
@@ -117,6 +117,7 @@ def train(cfg, dataLoader, model, optimizer):
     # iterate over dataLoader
     progressBar = trange(len(dataLoader))
     for idx, (data, labels) in enumerate(dataLoader):       # see the last line of file "dataset.py" where we return the image tensor (data) and label
+        step = idx + (epoch - 1)*idx
 
         # put data and labels on device
         data, labels = data.to(device), labels.to(device)
@@ -130,7 +131,7 @@ def train(cfg, dataLoader, model, optimizer):
         # loss
         loss = criterion(prediction, labels)
 
-        writer.add_scalar("Loss/train", loss, epoch)
+        #writer.add_scalar("Loss/train", loss, step)
 
         # backward pass (calculate gradients of current batch)
         loss.backward()
@@ -156,6 +157,7 @@ def train(cfg, dataLoader, model, optimizer):
     # end of epoch; finalize
     progressBar.close()
     loss_total /= len(dataLoader)           # shorthand notation for: loss_total = loss_total / len(dataLoader)
+    writer.add_scalar("Loss/train", loss, epoch)
     oa_total /= len(dataLoader)
 
     return loss_total, oa_total
@@ -253,7 +255,7 @@ def main():
         current_epoch += 1
         print(f'Epoch {current_epoch}/{numEpochs}')
 
-        loss_train, oa_train = train(cfg, dl_train, model, optim)
+        loss_train, oa_train = train(cfg, dl_train, model, optim, current_epoch)
         loss_val, oa_val = validate(cfg, dl_val, model)
 
         # combine stats and save
@@ -264,7 +266,7 @@ def main():
             'oa_val': oa_val
         }
         save_model(current_epoch, model, stats)
-        
+
     writer.flush()
     # That's all, folks!
         
