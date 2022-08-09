@@ -49,7 +49,7 @@ def create_outdir(cfg, folder):
     if not os.path.exists(folder):
         os.makedirs(folder)
     
-    os.system('cp ' + cfg + ' ' + folder)
+    os.system('cp ' + str(cfg) + ' ' + str(folder))
 
 
 
