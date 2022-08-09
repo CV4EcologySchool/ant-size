@@ -42,6 +42,17 @@ def create_dataloader(cfg, split='train'):
 
 
 
+def create_outdir(cfg, folder):
+    '''
+        Creates a model states folder within experiments folder
+    '''
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    
+    os.system('cp ' + cfg + ' ' + folder)
+
+
+
 def load_model(cfg):
     '''
         Creates a model instance and loads the latest model state weights.
@@ -69,7 +80,7 @@ def load_model(cfg):
 
 
 
-def save_model(epoch, model, stats):
+def save_model(epoch, model, stats, outdir):
     # make sure save directory exists; create if not
     os.makedirs('model_states', exist_ok=True)
 
@@ -77,7 +88,7 @@ def save_model(epoch, model, stats):
     stats['model'] = model.state_dict()
 
     # ...and save
-    torch.save(stats, open(f'model_states/{epoch}.pt', 'wb'))
+    torch.save(stats, open(f'{outdir}model_states/{epoch}.pt', 'wb'))
 
 
 
@@ -117,7 +128,7 @@ def train(cfg, dataLoader, model, optimizer, epoch):
     # iterate over dataLoader
     progressBar = trange(len(dataLoader))
     for idx, (data, labels) in enumerate(dataLoader):       # see the last line of file "dataset.py" where we return the image tensor (data) and label
-        step = idx + (epoch - 1)*idx
+        #step = idx + (epoch - 1)*idx
 
         # put data and labels on device
         data, labels = data.to(device), labels.to(device)
@@ -227,11 +238,16 @@ def main():
     # python ct_classifier/train.py --config configs/exp_resnet18.yaml
     parser = argparse.ArgumentParser(description='Train deep learning model.')
     parser.add_argument('--config', help='Path to config file', default='../configs/ant_size.yaml')
+    parser.add_argument('--output', help='Path to output folder', default = '../experiments/')
     args = parser.parse_args()
 
     # load config
     print(f'Using config "{args.config}"')
     cfg = yaml.safe_load(open(args.config, 'r'))
+
+    print(f'Saving results to "{args.output}"')
+    outdir = args.output
+    create_outdir(cfg, outdir)
 
     # check if GPU is available
     device = cfg['device']
@@ -265,7 +281,7 @@ def main():
             'oa_train': oa_train,
             'oa_val': oa_val
         }
-        save_model(current_epoch, model, stats)
+        save_model(current_epoch, model, stats, outdir)
 
     writer.flush()
     # That's all, folks!
