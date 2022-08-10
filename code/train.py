@@ -54,22 +54,22 @@ def create_outdir(cfg, folder):
 
 
 
-def load_model(cfg):
+def load_model(cfg, outdir):
     '''
         Creates a model instance and loads the latest model state weights.
     '''
     model_instance = CustomResNet18(cfg['num_classes'])         # create an object instance of our CustomResNet18 class
 
     # load latest model state
-    model_states = glob.glob('model_states/*.pt')
+    model_states = glob.glob(outdir+'/model_states/*.pt')
     if len(model_states):
         # at least one save state found; get latest
-        model_epochs = [int(m.replace('model_states/','').replace('.pt','')) for m in model_states]
+        model_epochs = [int(m.replace(outdir+'/model_states/','').replace('.pt','')) for m in model_states]
         start_epoch = max(model_epochs)
 
         # load state dict and apply weights to model
         print(f'Resuming from epoch {start_epoch}')
-        state = torch.load(open(f'model_states/{start_epoch}.pt', 'rb'), map_location='cpu')
+        state = torch.load(open(f'{outdir}/model_states/{start_epoch}.pt', 'rb'), map_location='cpu')
         model_instance.load_state_dict(state['model'])
 
     else:
@@ -261,7 +261,7 @@ def main():
     dl_val = create_dataloader(cfg, split='val')
 
     # initialize model
-    model, current_epoch = load_model(cfg)
+    model, current_epoch = load_model(cfg, outdir)
 
     # set up model optimizer
     optim = setup_optimizer(cfg, model)
