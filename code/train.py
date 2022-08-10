@@ -83,13 +83,13 @@ def load_model(cfg):
 
 def save_model(epoch, model, stats, outdir):
     # make sure save directory exists; create if not
-    os.makedirs('model_states', exist_ok=True)
+    os.makedirs('{outdir}/model_states', exist_ok=True)
 
     # get model parameters and add to stats...
     stats['model'] = model.state_dict()
 
     # ...and save
-    torch.save(stats, open(f'{outdir}model_states/{epoch}.pt', 'wb'))
+    torch.save(stats, open(f'{outdir}/model_states/{epoch}.pt', 'wb'))
 
 
 
