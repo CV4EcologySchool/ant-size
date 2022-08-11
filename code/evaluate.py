@@ -14,6 +14,7 @@ import os
 from glob import glob
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, accuracy_score
 import matplotlib.pyplot as plt
+from model import CustomResNet18
 
 from train import create_dataloader
 
