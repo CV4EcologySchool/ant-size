@@ -138,6 +138,8 @@ def train(cfg, dataLoader, model, optimizer, epoch):
         data, labels = data.to(device), labels.to(device)
 
         # forward pass
+        import IPython
+        IPython.embed()
         prediction = model(data)
 
         # reset gradients to zero
@@ -221,7 +223,7 @@ def validate(cfg, dataLoader, model):
             oa_total += oa.item()
 
             progressBar.set_description(
-                '[Val ] Loss: {:.2f}; OA: {:.2f}%'.format(
+                '[Val] Loss: {:.2f}; OA: {:.2f}%'.format(
                     loss_total/(idx+1),
                     100*oa_total/(idx+1)
                 )
@@ -286,14 +288,3 @@ def main():
             'oa_train': oa_train,
             'oa_val': oa_val
         }
-        save_model(current_epoch, model, stats, outdir)
-
-    writer.flush()
-    # That's all, folks!
-        
-
-
-if __name__ == '__main__':
-    # This block only gets executed if you call the "train.py" script directly
-    # (i.e., "python ct_classifier/train.py").
-    main()
