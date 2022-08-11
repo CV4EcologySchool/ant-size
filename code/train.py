@@ -16,10 +16,8 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 from torch.optim import SGD
+from torch.optim import lr_scheduler # add learning rate scheduling
 from torch.utils.tensorboard import SummaryWriter 
-
-# show model progress on tensorboard
-writer = SummaryWriter()
 
 # let's import our own classes and functions!
 from dataset import SizeDataset
@@ -27,15 +25,17 @@ from model import CustomResNet18
 
 
 
-def create_dataloader(cfg, split='train'):
+def create_dataloader(cfg, split='train', batch=None):
     '''
         Loads a dataset according to the provided split and wraps it in a
         PyTorch DataLoader object.
     '''
+    if batch==None:
+        batch = cfg['batch_size']
     dataset_instance = SizeDataset(cfg, split)        # create an object instance of our CTDataset class
     dataLoader = DataLoader(
             dataset=dataset_instance,
-            batch_size=cfg['batch_size'],
+            batch_size=batch,
             shuffle=True,
             num_workers=cfg['num_workers']
         )
@@ -45,11 +45,12 @@ def create_dataloader(cfg, split='train'):
 
 def create_outdir(cfg, folder):
     '''
-        Creates a model states folder within experiments folder
+        Creates a folder for experiment with config file
     '''
-    if not os.path.exists(folder):
-        os.makedirs(folder)
+    # create folder
+    os.makedirs(folder, exist_ok=True)
     
+    # copy config file to save model settings
     shutil.copy(cfg, folder)
 
 
@@ -245,6 +246,9 @@ def main():
     # load config
     print(f'Using config "{args.config}"')
     cfg = yaml.safe_load(open(args.config, 'r'))
+
+    # show model progress on tensorboard
+    writer = SummaryWriter()
 
     print(f'Saving results to "{args.output}"')
     outdir = args.output

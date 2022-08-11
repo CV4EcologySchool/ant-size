@@ -18,7 +18,7 @@ class CustomResNet18(nn.Module):
         '''
         super(CustomResNet18, self).__init__()
 
-        self.feature_extractor = resnet.resnet18(pretrained=True)       # "pretrained": use weights pre-trained on ImageNet
+        self.feature_extractor = resnet.resnet18(weights=ResNet18_Weights.DEFAULT)       # "pretrained": use weights pre-trained on ImageNet
 
         # replace the very last layer from the original, 1000-class output
         # ImageNet to a new one that outputs num_classes

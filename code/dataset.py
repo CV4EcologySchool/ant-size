@@ -56,13 +56,10 @@ class SizeDataset(Dataset):
             Returns a single data point at given idx.
             Here's where we actually load the image.
         '''
-        image_name, label = self.data[idx]              # see line 57 above where we added these two items to the self.data list
+        image_name, label = self.data[idx]             
 
         # load image
-        if self.split=='train':
-            image_path = os.path.join(self.data_root, 'train', image_name)
-        else:
-            image_path = os.path.join(self.data_root, 'val', image_name)
+        image_path = os.path.join(self.data_root, 'train', image_name) if self.split=='train' else os.path.join(self.data_root, 'val', image_name)
         img = Image.open(image_path).convert('RGB')     # the ".convert" makes sure we always get three bands in Red, Green, Blue order
 
         # transform: see lines 31ff above where we define our transformations
