@@ -33,14 +33,14 @@ def predict(cfg, dataLoader, model):
 
     return predictions, predict_labels, labels
 
-def save_confusion_matrix(y_true, y_pred, outdir):
+def save_confusion_matrix(y_true, y_pred, outdir, epoch, split):
     # make figures folder if not there
     os.makedirs(outdir+'/figs', exist_ok=True)
 
     cm = confusion_matrix(y_true, y_pred)
     disp = ConfusionMatrixDisplay(cm)
     disp.plot()
-    plt.savefig(outdir+'/figs/confusion_matrix.png', facecolor="white")
+    plt.savefig(outdir+'/figs/confusion_matrix_epoch'+str(epoch)+'_'+split+'.png', facecolor="white")
     
     return cm
 
@@ -74,7 +74,7 @@ def main():
     print("Accuracy of model is {:0.2f}".format(acc))
 
     # confusion matrix
-    cm = save_confusion_matrix(labels, predict_labels, outdir)
+    cm = save_confusion_matrix(labels, predict_labels, outdir, epoch, args.split)
 
     # precision recall curve
 
