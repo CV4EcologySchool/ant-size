@@ -40,7 +40,7 @@ class SizeDataset(Dataset):
         else:
             annoPath = os.path.join(
                 self.data_root,
-                'train_upsample_ant_size.csv' if self.split=='train' else "val_upsample_ant_size.csv"
+                'train_upsample_ant_size.csv' 
             )
         
         meta = pd.read_csv(annoPath)
@@ -49,8 +49,70 @@ class SizeDataset(Dataset):
         for index, row in meta.iterrows():   
             # append image-label tuple to data
             imgFileName = row['filename']
+            print("image filename is"+imgFileName)
             labelIndex = row['class']
+            print("class is"+ str(labelIndex))
             self.data.append([str(imgFileName), labelIndex])
+
+    def __len__(self):
+        '''
+            Returns the length of the dataset.
+        '''
+        return len(self.data)
+
+    
+    def __getitem__(self, idx):
+        '''
+            Returns a single data point at given idx.
+            Here's where we actually load the image.
+        '''
+        image_name, label = self.data[idx]             
+
+        # load image
+        image_path = os.path.join(self.data_root, 'images', image_name)
+        img = Image.open(image_path).convert('RGB')     # the ".convert" makes sure we always get three bands in Red, Green, Blue order
+
+        # transform: see lines 31ff above where we define our transformations
+        img_tensor = self.transform(img)
+
+        return img_tensor, label
+
+class SimpleDataset(Dataset):
+
+    def __init__(self, cfg, split='train', upsample=False):
+        '''
+            Constructor. Here, we collect and index the dataset inputs and
+            labels.
+        '''
+        self.data_root = cfg['data_root']
+        self.split = split
+        self.upsample = upsample 
+        self.transform = Compose([              
+            Resize((cfg['image_size'])),        
+            ToTensor()                         
+        ])
+        
+        # index data into list
+        self.data = []
+
+        # load annotation file
+  
+        annoPath = os.path.join(
+            self.data_root,
+            'train_ant_size.csv' if self.split=='train' else "val_ant_size.csv"
+        )
+    
+        meta = pd.read_csv(annoPath)
+        meta.reset_index()
+
+        for index, row in meta.iterrows():   
+            # append image-label tuple to data
+            if row['class'] == 0:
+                imgFileName = row['filename']
+                self.data.append([str(imgFileName), 0])
+            if row['class'] == 4:
+                imgFileName = row['filename']
+                self.data.append([str(imgFileName), 1])
 
     def __len__(self):
         '''

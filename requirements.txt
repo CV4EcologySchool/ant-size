@@ -3,6 +3,8 @@ tqdm
 sklearn
 scipy
 tensorboard
+pandas
+
 
 # PyTorch
 --find-links https://download.pytorch.org/whl/torch_stable.html

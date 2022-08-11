@@ -20,7 +20,7 @@ from torch.optim import lr_scheduler # add learning rate scheduling
 from torch.utils.tensorboard import SummaryWriter 
 
 # let's import our own classes and functions!
-from dataset import SizeDataset
+from dataset import SimpleDataset
 from model import CustomResNet18
 
 # show model progress on tensorboard
@@ -34,7 +34,7 @@ def create_dataloader(cfg, split='train', batch=None):
     '''
     if batch==None:
         batch = cfg['batch_size']
-    dataset_instance = SizeDataset(cfg, split)        # create an object instance of our CTDataset class
+    dataset_instance = SimpleDataset(cfg, split)        
     dataLoader = DataLoader(
             dataset=dataset_instance,
             batch_size=batch,
@@ -138,8 +138,6 @@ def train(cfg, dataLoader, model, optimizer, epoch):
         data, labels = data.to(device), labels.to(device)
 
         # forward pass
-        import IPython
-        IPython.embed()
         prediction = model(data)
 
         # reset gradients to zero
@@ -170,7 +168,8 @@ def train(cfg, dataLoader, model, optimizer, epoch):
             )
         )
         progressBar.update(1)
-    
+    import IPython
+    IPython.embed()
     # end of epoch; finalize
     progressBar.close()
     loss_total /= len(dataLoader)           # shorthand notation for: loss_total = loss_total / len(dataLoader)
