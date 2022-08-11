@@ -168,8 +168,8 @@ def train(cfg, dataLoader, model, optimizer, epoch):
             )
         )
         progressBar.update(1)
-    import IPython
-    IPython.embed()
+    #import IPython
+    #IPython.embed()
     # end of epoch; finalize
     progressBar.close()
     loss_total /= len(dataLoader)           # shorthand notation for: loss_total = loss_total / len(dataLoader)
