@@ -22,6 +22,7 @@ class SizeDataset(Dataset):
         '''
         self.data_root = cfg['data_root']
         self.split = split
+        self.upsample = upsample 
         self.transform = Compose([              
             Resize((cfg['image_size'])),        
             ToTensor()                         
