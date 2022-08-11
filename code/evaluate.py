@@ -49,6 +49,7 @@ def main():
     # python code/train.py --output model_runs
     parser = argparse.ArgumentParser(description='Train deep learning model.')
     parser.add_argument('--output', required=True, help='Path to output folder')
+    parser.add_argument('--split', help='Data split')
     args = parser.parse_args()
 
     # set model directory
@@ -60,10 +61,9 @@ def main():
     # load config
     print(f'Using config "{config}"')
     cfg = yaml.safe_load(open(config, 'r'))
-    
 
     # setup dataloader
-    dl_val = create_dataloader(cfg, split='val', batch=1)
+    dl_val = create_dataloader(cfg, split=args.split, batch=1)
 
     # load model and predict from model
     model, epoch = load_model(cfg, outdir)
@@ -77,6 +77,8 @@ def main():
     cm = save_confusion_matrix(labels, predict_labels, outdir)
 
     # precision recall curve
+
+    # save list of predictions
 
 
 
