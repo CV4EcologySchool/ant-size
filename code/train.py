@@ -62,7 +62,8 @@ def load_model(cfg, outdir):
         Creates a model instance and loads the latest model state weights.
     '''
     model_instance = CustomResNet18(cfg['num_classes'])         # create an object instance of our CustomResNet18 class
-
+    import IPython
+    Ipython.embed()
     # load latest model state
     model_states = glob.glob(outdir+'/model_states/*.pt')
     if len(model_states):
