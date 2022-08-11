@@ -2,6 +2,7 @@ PyYAML
 tqdm
 sklearn
 scipy
+tensorboard
 
 # PyTorch
 --find-links https://download.pytorch.org/whl/torch_stable.html

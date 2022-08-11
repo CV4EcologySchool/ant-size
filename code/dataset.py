@@ -38,7 +38,7 @@ class SizeDataset(Dataset):
             )
         else:
             annoPath = os.path.join(
-                self.data_root
+                self.data_root,
                 'train_upsample_ant_size.csv' if self.split=='train' else "val_upsample_ant_size.csv"
             )
         
