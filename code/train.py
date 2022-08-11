@@ -63,7 +63,7 @@ def load_model(cfg, outdir):
     '''
     model_instance = CustomResNet18(cfg['num_classes'])         # create an object instance of our CustomResNet18 class
     import IPython
-    Ipython.embed()
+    IPython.embed()
     # load latest model state
     model_states = glob.glob(outdir+'/model_states/*.pt')
     if len(model_states):
