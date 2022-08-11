@@ -288,3 +288,6 @@ def main():
             'oa_train': oa_train,
             'oa_val': oa_val
         }
+
+if __name__ == '__main__':
+    main()
