@@ -66,7 +66,7 @@ def load_model(cfg, outdir):
     IPython.embed()
     # load latest model state
     model_states = glob.glob(outdir+'/model_states/*.pt')
-    if len(model_states):
+    if len(model_states) > 0:
         # at least one save state found; get latest
         model_epochs = [int(m.replace(outdir+'/model_states/','').replace('.pt','')) for m in model_states]
         start_epoch = max(model_epochs)
