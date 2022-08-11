@@ -287,6 +287,7 @@ def main():
             'oa_train': oa_train,
             'oa_val': oa_val
         }
+        save_model(current_epoch, model, stats, outdir)
 
 if __name__ == '__main__':
     main()
