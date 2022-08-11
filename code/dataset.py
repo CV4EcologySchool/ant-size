@@ -12,28 +12,35 @@ from torchvision.transforms import Compose, Resize, ToTensor
 from PIL import Image
 
 
+
 class SizeDataset(Dataset):
 
-    def __init__(self, cfg, split='train'):
+    def __init__(self, cfg, split='train', upsample=False):
         '''
             Constructor. Here, we collect and index the dataset inputs and
             labels.
         '''
         self.data_root = cfg['data_root']
         self.split = split
-        self.transform = Compose([              # Transforms. Here's where we could add data augmentation (see Björn's lecture on August 11).
-            Resize((cfg['image_size'])),        # For now, we just resize the images to the same dimensions...
-            ToTensor()                          # ...and convert them to torch.Tensor.
+        self.transform = Compose([              
+            Resize((cfg['image_size'])),        
+            ToTensor()                         
         ])
         
         # index data into list
         self.data = []
 
         # load annotation file
-        annoPath = os.path.join(
-            self.data_root,
-            'train_ant_size.csv' if self.split=='train' else "val_ant_size.csv"
-        )
+        if not self.upsample:
+            annoPath = os.path.join(
+                self.data_root,
+                'train_ant_size.csv' if self.split=='train' else "val_ant_size.csv"
+            )
+        else:
+            annoPath = os.path.join(
+                self.data_root
+                'train_upsample_ant_size.csv' if self.split=='train' else "val_upsample_ant_size.csv"
+            )
         
         meta = pd.read_csv(annoPath)
         meta.reset_index()
@@ -41,7 +48,7 @@ class SizeDataset(Dataset):
         for index, row in meta.iterrows():   
             # append image-label tuple to data
             imgFileName = row['filename']
-            labelIndex = row['cat']
+            labelIndex = row['class']
             self.data.append([str(imgFileName), labelIndex])
 
     def __len__(self):
@@ -59,7 +66,7 @@ class SizeDataset(Dataset):
         image_name, label = self.data[idx]             
 
         # load image
-        image_path = os.path.join(self.data_root, 'train', image_name) if self.split=='train' else os.path.join(self.data_root, 'val', image_name)
+        image_path = os.path.join(self.data_root, 'images', image_name)
         img = Image.open(image_path).convert('RGB')     # the ".convert" makes sure we always get three bands in Red, Green, Blue order
 
         # transform: see lines 31ff above where we define our transformations

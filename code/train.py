@@ -170,8 +170,9 @@ def train(cfg, dataLoader, model, optimizer, epoch):
     # end of epoch; finalize
     progressBar.close()
     loss_total /= len(dataLoader)           # shorthand notation for: loss_total = loss_total / len(dataLoader)
-    writer.add_scalar("Loss/train", loss, epoch)
+    writer.add_scalar("Loss/train", loss_total, epoch)
     oa_total /= len(dataLoader)
+    writer.add_scalar("Acc/train", oa_total, epoch)
 
     return loss_total, oa_total
 
