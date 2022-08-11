@@ -25,7 +25,7 @@ def load_model(cfg, outdir, epoch=None):
     model_instance = CustomResNet18(cfg['num_classes'])         # create an object instance of our CustomResNet18 class
 
     # load latest model state
-    model_states = glob.glob(outdir+'/model_states/*.pt')
+    model_states = glob(outdir+'/model_states/*.pt')
 
     if len(model_states) > 0:
         # at least one save state found; get latest
