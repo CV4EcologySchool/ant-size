@@ -11,6 +11,7 @@ import scipy
 import numpy as np
 import argparse
 import os
+from glob import glob
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, accuracy_score
 import matplotlib.pyplot as plt
 
@@ -45,17 +46,21 @@ def save_confusion_matrix(y_true, y_pred, outdir):
 
 def main():
     # Argument parser for command-line arguments:
-    # python code/train.py --config yaml_file --output model_runs
+    # python code/train.py --output model_runs
     parser = argparse.ArgumentParser(description='Train deep learning model.')
-    # need to change to use config in model output file
-    parser.add_argument('--config', help='Path to config file', default='../configs/ant_size.yaml')
     parser.add_argument('--output', required=True, help='Path to output folder')
     args = parser.parse_args()
 
-    # load config
-    print(f'Using config "{args.config}"')
-    cfg = yaml.safe_load(open(args.config, 'r'))
+    # set model directory
     outdir = args.output
+
+    # get config from model directory
+    config = glob(outdir+'*.yaml')[0]
+
+    # load config
+    print(f'Using config "{config}"')
+    cfg = yaml.safe_load(open(config, 'r'))
+    
 
     # setup dataloader
     dl_val = create_dataloader(cfg, split='val', batch=1)
@@ -70,6 +75,8 @@ def main():
 
     # confusion matrix
     cm = save_confusion_matrix(labels, predict_labels, outdir)
+
+    # precision recall curve
 
 
 
