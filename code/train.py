@@ -23,6 +23,8 @@ from torch.utils.tensorboard import SummaryWriter
 from dataset import SizeDataset
 from model import CustomResNet18
 
+# show model progress on tensorboard
+writer = SummaryWriter()
 
 
 def create_dataloader(cfg, split='train', batch=None):
@@ -247,9 +249,6 @@ def main():
     # load config
     print(f'Using config "{args.config}"')
     cfg = yaml.safe_load(open(args.config, 'r'))
-
-    # show model progress on tensorboard
-    writer = SummaryWriter()
 
     print(f'Saving results to "{args.output}"')
     outdir = args.output
