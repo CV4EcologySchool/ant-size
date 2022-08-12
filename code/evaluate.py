@@ -68,6 +68,17 @@ def predict(dataLoader, model):
 
     return predictions, predict_labels, labels
 
+def get_fuzzy_accuracy(y_true, y_pred):
+    # OA: number of correct predictions divided by batch size (i.e., average/mean)
+    facc = 0
+    for true, pred in zip(y_true, y_pred):
+        if pred in range(true - 1, true + 1, 1):
+            facc += 1
+    
+    facc /= len(y_true)
+
+    return facc
+
 def save_confusion_matrix(y_true, y_pred, outdir, epoch, split):
     # make figures folder if not there
     os.makedirs(outdir+'/figs', exist_ok=True)
@@ -75,8 +86,6 @@ def save_confusion_matrix(y_true, y_pred, outdir, epoch, split):
     cm = confusion_matrix(y_true, y_pred)
     disp = ConfusionMatrixDisplay(cm)
     disp.plot()
-    print(epoch)
-    type(epoch)
     plt.savefig(outdir+'/figs/confusion_matrix_epoch'+str(epoch)+'_'+str(split)+'.png', facecolor="white")
     
     return cm
@@ -86,7 +95,7 @@ def main():
     # python code/train.py --output model_runs
     parser = argparse.ArgumentParser(description='Train deep learning model.')
     parser.add_argument('--output', required=True, help='Path to output folder')
-    parser.add_argument('--split', help='Data split')
+    parser.add_argument('--split', help='Data split', default='val')
     parser.add_argument('--epoch', help='Epoch to load')
     args = parser.parse_args()
 
@@ -97,28 +106,32 @@ def main():
     config = glob(outdir+'*.yaml')[0]
 
     # load config
-    print(f'Using config "{config}"')
+    print(f'Using config "{config}" and using "{args.split}" set')
     cfg = yaml.safe_load(open(config, 'r'))
 
     # setup dataloader
     dl_val = create_dataloader(cfg, split=args.split, batch=1)
 
     # load model and predict from model
-
     model, epoch = load_model(cfg, outdir, args.epoch)
-    print(epoch)
     predictions, predict_labels, labels = predict(dl_val, model)   
     
     # get accuracy score
     acc = accuracy_score(labels, predict_labels)
     print("Accuracy of model is {:0.2f}".format(acc))
+    
+    # get fuzzy accuracy
+    facc = get_fuzzy_accuracy(labels, predict_labels)
+    print("Accuracy within 1 class is {:0.2f}".format(facc))
 
     # confusion matrix
     cm = save_confusion_matrix(labels, predict_labels, outdir, epoch, args.split)
 
+    # save list of predictions with filename
+
     # precision recall curve
 
-    # save list of predictions
+    
 
 
 
