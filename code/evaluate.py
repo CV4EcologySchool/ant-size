@@ -8,6 +8,7 @@
 import yaml
 import torch
 import scipy
+import pandas as pd
 import numpy as np
 import argparse
 import os
@@ -55,6 +56,7 @@ def predict(dataLoader, model):
     predictions = []
     predict_labels = []
     labels = []
+    data = []
 
     model.eval()
 
@@ -66,7 +68,7 @@ def predict(dataLoader, model):
       predict_labels.append(int(predict_label))
       labels.append(int(label))
 
-    return predictions, predict_labels, labels
+    return data, predictions, predict_labels, labels
 
 def get_fuzzy_accuracy(y_true, y_pred):
     # OA: number of correct predictions divided by batch size (i.e., average/mean)
@@ -128,10 +130,14 @@ def main():
     cm = save_confusion_matrix(labels, predict_labels, outdir, epoch, args.split)
 
     # save list of predictions with filename
+    df = pd.DataFrame('filename': data,
+                    'predictions': predictions,
+                    'predict_label': predict_labels,
+                    'real_label': labels
+    )
+    df.to_csv(outdir+'/results_epoch'+str(epoch)+'_'+str(args.split)+'.csv', index = False)
 
     # precision recall curve
-
-    
 
 
 
