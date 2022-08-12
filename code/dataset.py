@@ -15,7 +15,7 @@ from PIL import Image
 
 class SizeDataset(Dataset):
 
-    def __init__(self, cfg, split='train', upsample=False):
+    def __init__(self, cfg, split='train'):
         '''
             Constructor. Here, we collect and index the dataset inputs and
             labels.
@@ -35,7 +35,7 @@ class SizeDataset(Dataset):
         if not self.upsample:
             annoPath = os.path.join(
                 self.data_root,
-                'train_ant_size.csv' if self.split=='train' else "val_ant_size.csv"
+                'train.csv' if self.split=='train' else "val.csv"
             )
         else:
             annoPath = os.path.join(
@@ -74,6 +74,9 @@ class SizeDataset(Dataset):
         img_tensor = self.transform(img)
 
         return img_tensor, label
+
+
+
 
 class SimpleDataset(Dataset):
 

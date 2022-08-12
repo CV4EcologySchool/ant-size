@@ -38,7 +38,7 @@ def create_dataloader(cfg, split='train', batch=None):
     dataLoader = DataLoader(
             dataset=dataset_instance,
             batch_size=batch,
-            shuffle=True,
+            shuffle=False,
             num_workers=cfg['num_workers']
         )
     return dataLoader
@@ -290,6 +290,8 @@ def main():
             'oa_val': oa_val
         }
         save_model(current_epoch, model, stats, outdir)
+
+
 
 if __name__ == '__main__':
     main()

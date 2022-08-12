@@ -9,6 +9,7 @@ num_workers: 4
 # dataset parameters
 data_root: /datadrive/antmass/
 num_classes: 5
+perc_split: 0.2
 
 # training hyperparameters
 image_size: [128, 128]

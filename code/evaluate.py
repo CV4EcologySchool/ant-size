@@ -5,12 +5,11 @@
     2022 Natalie Imirzian
 '''
 
-import dataclasses
 import yaml
 import torch
-import scipy
+import torch.nn as nn
 import pandas as pd
-import numpy as np
+
 import argparse
 import os
 from glob import glob
@@ -57,7 +56,7 @@ def predict(dataLoader, model):
     predictions = []
     predict_labels = []
     labels = []
-    datas = []
+    filename = []
 
     model.eval()
 
@@ -68,9 +67,11 @@ def predict(dataLoader, model):
       predictions.append(prediction)
       predict_labels.append(int(predict_label))
       labels.append(int(label))
-      datas.append(data)
+      filename.append(dataLoader.dataset.data[idx][0])
 
-    return datas, predictions, predict_labels, labels
+    return filename, predictions, predict_labels, labels
+
+
 
 def get_fuzzy_accuracy(y_true, y_pred):
     facc = 0
@@ -82,6 +83,8 @@ def get_fuzzy_accuracy(y_true, y_pred):
 
     return facc
 
+
+
 def save_confusion_matrix(y_true, y_pred, outdir, epoch, split):
     # make figures folder if not there
     os.makedirs(outdir+'/figs', exist_ok=True)
@@ -92,6 +95,24 @@ def save_confusion_matrix(y_true, y_pred, outdir, epoch, split):
     plt.savefig(outdir+'/figs/confusion_matrix_epoch'+str(epoch)+'_'+str(split)+'.png', facecolor="white")
     
     return cm
+
+
+
+def create_results(files, predictions, y_true, y_pred):
+    sm = []
+    
+    for p in predictions:
+        sm.append(nn.Softmax(p))
+
+    df = pd.DataFrame({'filename': files,
+                    'likelihood': sm,
+                    'predict_label': y_pred,
+                    'real_label': y_true}
+    )
+    
+    return df
+
+
 
 def main():
     # Argument parser for command-line arguments:
@@ -106,7 +127,7 @@ def main():
     outdir = args.output
 
     # get config from model directory
-    config = glob(outdir+'*.yaml')[0]
+    config = glob(outdir+'/*.yaml')[0]
 
     # load config
     print(f'Using config "{config}" and using "{args.split}" set')
@@ -117,7 +138,7 @@ def main():
 
     # load model and predict from model
     model, epoch = load_model(cfg, outdir, args.epoch)
-    data, predictions, predict_labels, labels = predict(dl_val, model)   
+    fn, predictions, predict_labels, labels = predict(dl_val, model)   
     
     # get accuracy score
     acc = accuracy_score(labels, predict_labels)
@@ -131,11 +152,7 @@ def main():
     cm = save_confusion_matrix(labels, predict_labels, outdir, epoch, args.split)
 
     # save list of predictions with filename
-    df = pd.DataFrame({'filename': data,
-                    #'predictions': predictions,
-                    'predict_label': predict_labels,
-                    'real_label': labels}
-    )
+    df = create_results(fn, predictions, predict_labels, labels)
     df.to_csv(outdir+'/results_epoch'+str(epoch)+'_'+str(args.split)+'.csv', index = False)
 
     # precision recall curve
