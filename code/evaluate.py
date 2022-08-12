@@ -104,6 +104,7 @@ def main():
     # load model and predict from model
 
     model, epoch = load_model(cfg, outdir, args.epoch)
+    print(epoch)
     predictions, predict_labels, labels = predict(dl_val, model)   
     
     # get accuracy score
