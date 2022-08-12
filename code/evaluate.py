@@ -131,7 +131,7 @@ def main():
 
     # save list of predictions with filename
     df = pd.DataFrame({'filename': data,
-                    'predictions': predictions,
+                    #'predictions': predictions,
                     'predict_label': predict_labels,
                     'real_label': labels}
     )
