@@ -40,9 +40,9 @@ def load_model(cfg, outdir, epoch=None):
         state = torch.load(open(f'{outdir}/model_states/{start_epoch}.pt', 'rb'), map_location='cpu')
         model_instance.load_state_dict(state['model'])
 
-        import IPython
-        IPython.embed()
-        
+        #import IPython
+        #IPython.embed()
+
     else:
         # no save state found; start anew
         print('No model found')
