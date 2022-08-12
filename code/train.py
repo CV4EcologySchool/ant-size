@@ -182,7 +182,7 @@ def train(cfg, dataLoader, model, optimizer, epoch):
 
 
 
-def validate(cfg, dataLoader, model):
+def validate(cfg, dataLoader, model, epoch):
     '''
         Validation function. Note that this looks almost the same as the training
         function, except that we don't use any optimizer or gradient steps.
@@ -233,7 +233,9 @@ def validate(cfg, dataLoader, model):
     # end of epoch; finalize
     progressBar.close()
     loss_total /= len(dataLoader)
+    writer.add_scalar("Loss/val", loss_total, epoch)
     oa_total /= len(dataLoader)
+    writer.add_scalar("Acc/val", oa_total, epoch)
 
     return loss_total, oa_total
 
@@ -279,7 +281,7 @@ def main():
         print(f'Epoch {current_epoch}/{numEpochs}')
 
         loss_train, oa_train = train(cfg, dl_train, model, optim, current_epoch)
-        loss_val, oa_val = validate(cfg, dl_val, model)
+        loss_val, oa_val = validate(cfg, dl_val, model, current_epoch)
 
         # combine stats and save
         stats = {
