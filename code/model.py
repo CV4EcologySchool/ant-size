@@ -6,7 +6,7 @@
 '''
 
 import torch.nn as nn
-from torchvision.models import resnet, ResNet18_Weights
+from torchvision.models import resnet
 
 
 class CustomResNet18(nn.Module):
