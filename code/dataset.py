@@ -49,9 +49,7 @@ class SizeDataset(Dataset):
         for index, row in meta.iterrows():   
             # append image-label tuple to data
             imgFileName = row['filename']
-            print("image filename is"+imgFileName)
             labelIndex = row['class']
-            print("class is"+ str(labelIndex))
             self.data.append([str(imgFileName), labelIndex])
 
     def __len__(self):
