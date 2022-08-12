@@ -5,6 +5,7 @@
     2022 Natalie Imirzian
 '''
 
+import dataclasses
 import yaml
 import torch
 import scipy
@@ -56,7 +57,7 @@ def predict(dataLoader, model):
     predictions = []
     predict_labels = []
     labels = []
-    data = []
+    datas = []
 
     model.eval()
 
@@ -67,11 +68,11 @@ def predict(dataLoader, model):
       predictions.append(prediction)
       predict_labels.append(int(predict_label))
       labels.append(int(label))
+      datas.append(data)
 
-    return data, predictions, predict_labels, labels
+    return datas, predictions, predict_labels, labels
 
 def get_fuzzy_accuracy(y_true, y_pred):
-    # OA: number of correct predictions divided by batch size (i.e., average/mean)
     facc = 0
     for true, pred in zip(y_true, y_pred):
         if pred in range(true - 1, true + 1, 1):
