@@ -77,7 +77,7 @@ def save_confusion_matrix(y_true, y_pred, outdir, epoch, split):
     disp.plot()
     print(epoch)
     type(epoch)
-    plt.savefig(outdir+'/figs/confusion_matrix_epoch'+str(epoch)+'_'+split+'.png', facecolor="white")
+    plt.savefig(outdir+'/figs/confusion_matrix_epoch'+str(epoch)+'_'+str(split)+'.png', facecolor="white")
     
     return cm
 
