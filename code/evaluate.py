@@ -130,10 +130,10 @@ def main():
     cm = save_confusion_matrix(labels, predict_labels, outdir, epoch, args.split)
 
     # save list of predictions with filename
-    df = pd.DataFrame('filename': data,
+    df = pd.DataFrame({'filename': data,
                     'predictions': predictions,
                     'predict_label': predict_labels,
-                    'real_label': labels
+                    'real_label': labels}
     )
     df.to_csv(outdir+'/results_epoch'+str(epoch)+'_'+str(args.split)+'.csv', index = False)
 
