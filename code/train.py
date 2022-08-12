@@ -20,7 +20,7 @@ from torch.optim import lr_scheduler # add learning rate scheduling
 from torch.utils.tensorboard import SummaryWriter 
 
 # let's import our own classes and functions!
-from dataset import SimpleDataset
+from dataset import SizeDataset
 from model import CustomResNet18
 
 # show model progress on tensorboard
@@ -34,7 +34,7 @@ def create_dataloader(cfg, split='train', batch=None):
     '''
     if batch==None:
         batch = cfg['batch_size']
-    dataset_instance = SimpleDataset(cfg, split)        
+    dataset_instance = SizeDataset(cfg, split)        
     dataLoader = DataLoader(
             dataset=dataset_instance,
             batch_size=batch,
@@ -61,9 +61,8 @@ def load_model(cfg, outdir):
     '''
         Creates a model instance and loads the latest model state weights.
     '''
-    model_instance = CustomResNet18(cfg['num_classes'])         # create an object instance of our CustomResNet18 class
-    import IPython
-    IPython.embed()
+    model_instance = CustomResNet18(cfg['num_classes'])  # create an object instance of our CustomResNet18 class
+           
     # load latest model state
     model_states = glob.glob(outdir+'/model_states/*.pt')
     if len(model_states) > 0:

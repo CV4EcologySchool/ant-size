@@ -50,7 +50,7 @@ def load_model(cfg, outdir, epoch=None):
 
     return model_instance, start_epoch
 
-def predict(cfg, dataLoader, model):
+def predict(dataLoader, model):
   with torch.no_grad():   # no gradients needed for prediction
     predictions = []
     predict_labels = []
@@ -104,7 +104,7 @@ def main():
     # load model and predict from model
 
     model, epoch = load_model(cfg, outdir, args.epoch)
-    predictions, predict_labels, labels = predict(cfg, dl_val, model)   
+    predictions, predict_labels, labels = predict(dl_val, model)   
     
     # get accuracy score
     acc = accuracy_score(labels, predict_labels)
