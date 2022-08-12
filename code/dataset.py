@@ -15,7 +15,7 @@ from PIL import Image
 
 class SizeDataset(Dataset):
 
-    def __init__(self, cfg, split='train'):
+    def __init__(self, cfg, split='train', upsample=False):
         '''
             Constructor. Here, we collect and index the dataset inputs and
             labels.
