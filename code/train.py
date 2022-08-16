@@ -235,9 +235,8 @@ def validate(cfg, dataLoader, model, epoch):
             oa_total += oa.item()
 
             # fuzzy accuracy
-            fa = torch.mean((pred_label == labels | 
-                             pred_label == labels-1 | 
-                             pred_label == labels+1).float())
+            for(true, pred) in zip(labels, pred_label)
+            fa = torch.mean((pred_label == labels-1).float())
             fa_total += fa.item()
 
             progressBar.set_description(
@@ -288,7 +287,7 @@ def main():
         A.ToFloat(max_value=255.0),
         A.Rotate(-cfg['rotate_deg'], cfg['rotate_deg']),
         A.Flip(cfg['flip_prob']),
-        A.ToSepia(p=cfg['sepia_prob']),
+        #A.ToSepia(p=cfg['sepia_prob']),
         ToTensorV2(),
         #torch.Tensor.double()
     ])
