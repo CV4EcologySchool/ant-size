@@ -7,9 +7,9 @@ device: cuda
 num_workers: 4
 
 # dataset parameters
-data_root: /datadrive/antmass/
+data_root: ../data/antmass/
 num_classes: 5
-experiment: unb.5class.augment.shuffle
+experiment: unb.5class.augment
 perc_split: 0.2
 
 # training hyperparameters
@@ -21,6 +21,10 @@ weight_decay: 0.001
 
 # augmentation hyperparameters
 rotate_deg: 360
-flip_prob: 0.2
-sepia_prob: 0
+flip_prob: 0.5
+sepia_prob: 0.2
+color_jitter: 0.1
+dropout: 0.1
+noise: 0.1
+sepia: 0.1
 

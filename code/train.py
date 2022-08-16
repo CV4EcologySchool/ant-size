@@ -294,7 +294,7 @@ def validate(cfg, dataLoader, model, epoch, outdir):
     oa_total /= len(dataLoader)
     writer.add_scalar("Acc/val", oa_total, epoch)
     fa = get_fuzzy_accuracy(true_labels, pred_labels)
-    writer.add_scalar("Fa/train", fa, epoch)
+    writer.add_scalar("Fa/val", fa, epoch)
 
     # save confusion matrix
     save_confusion_matrix(true_labels, pred_labels, oa_total, outdir, epoch, "val")
