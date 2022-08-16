@@ -135,7 +135,7 @@ def get_fuzzy_accuracy(y_true, y_pred):
     for true, pred in zip(y_true, y_pred):
         import IPython
         IPython.embed()
-        if int(pred) in range(int(true) - 1, int(true) + 1, 1):
+        if pred in range(true - 1, true + 1, 1):
             facc += 1
     
     facc /= len(y_true)
@@ -277,8 +277,8 @@ def validate(cfg, dataLoader, model, epoch, outdir):
             oa = torch.mean((pred_label == labels).float())
             oa_total += oa.item()
 
-            true_labels.append(labels.numpy().tolist())
-            pred_labels.append(pred_label.numpy().tolist())
+            true_labels.extend(labels.numpy().tolist())
+            pred_labels.extend(pred_label.numpy().tolist())
 
             progressBar.set_description(
                 '[Val] Loss: {:.2f}; OA: {:.2f}%'.format(
