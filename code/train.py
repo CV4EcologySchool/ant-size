@@ -268,15 +268,14 @@ def main():
     # python ct_classifier/train.py --config configs/exp_resnet18.yaml
     parser = argparse.ArgumentParser(description='Train deep learning model.')
     parser.add_argument('--config', help='Path to config file', default='../configs/ant_size.yaml')
-    parser.add_argument('--output', required=True, help='Path to output folder')
     args = parser.parse_args()
 
     # load config
     print(f'Using config "{args.config}"')
     cfg = yaml.safe_load(open(args.config, 'r'))
 
-    print(f'Saving results to "{args.output}"')
-    outdir = args.output
+   #print(f'Saving results to {cfg['experiment']}')
+    outdir = os.path.join(cfg['data_root'], cfg['experiment'])
     create_outdir(args.config, outdir)
 
     # check if GPU is available
