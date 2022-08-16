@@ -31,7 +31,8 @@ class SizeDataset(Dataset):
         if transform:
             self.transform = transform
         else:
-            self.transform = A.Compose([              
+            self.transform = A.Compose([ 
+                A.ToFloat(max_value=255.0),             
                 ToTensorV2(),
             ])  
         
@@ -69,7 +70,7 @@ class SizeDataset(Dataset):
 
         # load image
         image_path = os.path.join(self.data_root, 'images', image_name)
-        img = np.array(Image.open(image_path).convert('RGB')) / 255    # the ".convert" makes sure we always get three bands in Red, Green, Blue order
+        img = np.array(Image.open(image_path)).astype(np.uint8)     # the ".convert" makes sure we always get three bands in Red, Green, Blue order
         
 
         img_tensor = self.transform(image=img)
@@ -132,10 +133,10 @@ class SimpleDataset(Dataset):
 
         # load image
         image_path = os.path.join(self.data_root, 'images', image_name)
-        img = Image.open(image_path).convert('RGB')     # the ".convert" makes sure we always get three bands in Red, Green, Blue order
+        img = np.array(Image.open(image_path).convert('RGB')).astype(np.uint8)    # the ".convert" makes sure we always get three bands in Red, Green, Blue order
 
         # transform: see lines 31ff above where we define our transformations
-        img_tensor = self.transform(img)
+        img_tensor = self.transform(image=img)["image"]
 
         return img_tensor, label
 
