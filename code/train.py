@@ -25,7 +25,6 @@ from albumentations.pytorch import ToTensorV2
 # let's import our own classes and functions!
 from dataset import SizeDataset, Transform
 from model import CustomResNet18
-from evaluate import save_confusion_matrix
 
 # show model progress on tensorboard
 writer = SummaryWriter()
