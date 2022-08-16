@@ -25,6 +25,7 @@ from albumentations.pytorch import ToTensorV2
 # let's import our own classes and functions!
 from dataset import SizeDataset, Transform
 from model import CustomResNet18
+from evaluate import save_confusion_matrix
 
 # show model progress on tensorboard
 writer = SummaryWriter()
@@ -166,6 +167,12 @@ def train(cfg, dataLoader, model, optimizer, epoch):
         oa = torch.mean((pred_label == labels).float()) # OA: number of correct predictions divided by batch size (i.e., average/mean)
         oa_total += oa.item()
 
+        # fuzzy accuracy
+        fa = torch.mean((pred_label == labels | 
+                        pred_label == labels-1 | 
+                        pred_label == labels+1).float())
+        fa_total += fa.item()
+
         progressBar.set_description(
             '[Train] Loss: {:.2f}; OA: {:.2f}%'.format(
                 loss_total/(idx+1),
@@ -181,6 +188,8 @@ def train(cfg, dataLoader, model, optimizer, epoch):
     writer.add_scalar("Loss/train", loss_total, epoch)
     oa_total /= len(dataLoader)
     writer.add_scalar("Acc/train", oa_total, epoch)
+    fa_total /= len(dataLoader)
+    writer.add_scalar("Fa/val", fa_total, epoch)
 
     return loss_total, oa_total
 
@@ -226,6 +235,12 @@ def validate(cfg, dataLoader, model, epoch):
             oa = torch.mean((pred_label == labels).float())
             oa_total += oa.item()
 
+            # fuzzy accuracy
+            fa = torch.mean((pred_label == labels | 
+                             pred_label == labels-1 | 
+                             pred_label == labels+1).float())
+            fa_total += fa.item()
+
             progressBar.set_description(
                 '[Val] Loss: {:.2f}; OA: {:.2f}%'.format(
                     loss_total/(idx+1),
@@ -240,6 +255,8 @@ def validate(cfg, dataLoader, model, epoch):
     writer.add_scalar("Loss/val", loss_total, epoch)
     oa_total /= len(dataLoader)
     writer.add_scalar("Acc/val", oa_total, epoch)
+    fa_total /= len(dataLoader)
+    writer.add_scalar("Fa/val", fa_total, epoch)
 
     return loss_total, oa_total
 
