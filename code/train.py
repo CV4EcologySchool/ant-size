@@ -19,22 +19,27 @@ from torch.optim import SGD
 from torch.optim import lr_scheduler # add learning rate scheduling
 from torch.utils.tensorboard import SummaryWriter 
 
+import albumentations as A
+from albumentations.pytorch import ToTensorV2
+
 # let's import our own classes and functions!
-from dataset import SizeDataset
+from dataset import SizeDataset, Transform
 from model import CustomResNet18
 
 # show model progress on tensorboard
 writer = SummaryWriter()
 
 
-def create_dataloader(cfg, split='train', batch=None):
+def create_dataloader(cfg, split='train', transforms=None, batch=None):
     '''
         Loads a dataset according to the provided split and wraps it in a
         PyTorch DataLoader object.
     '''
     if batch==None:
         batch = cfg['batch_size']
-    dataset_instance = SizeDataset(cfg, split)        
+
+    #transforms = Transform()
+    dataset_instance = SizeDataset(cfg, split, transforms)        
     dataLoader = DataLoader(
             dataset=dataset_instance,
             batch_size=batch,
@@ -263,8 +268,16 @@ def main():
         print(f'WARNING: device set to "{device}" but CUDA not available; falling back to CPU...')
         cfg['device'] = 'cpu'
 
+    # create tranformation
+    transforms = A.Compose([
+        A.Rotate(-cfg['rotate_deg'], cfg['rotate_deg']),
+        A.Flip(cfg['flip_prob']),
+        A.ToSepia(p=cfg['sepia_prob']),
+        ToTensorV2()
+    ])
+
     # initialize data loaders for training and validation set
-    dl_train = create_dataloader(cfg, split='train')
+    dl_train = create_dataloader(cfg, split='train', transforms=transforms)
     dl_val = create_dataloader(cfg, split='val')
 
     # initialize model

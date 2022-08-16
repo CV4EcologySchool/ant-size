@@ -7,42 +7,43 @@
 
 import os
 import pandas as pd
+import numpy as np
 from torch.utils.data import Dataset
-from torchvision.transforms import Compose, Resize, ToTensor
+#from torchvision.transforms import Compose, Resize, ToTensor
 from PIL import Image
+import torch
+#import torchvision.transforms as T
+import albumentations as A
+from albumentations.pytorch import ToTensorV2
+torch.manual_seed(42)
 
 
 
 class SizeDataset(Dataset):
 
-    def __init__(self, cfg, split='train', upsample=False):
+    def __init__(self, cfg, transform=None, split='train'):
         '''
             Constructor. Here, we collect and index the dataset inputs and
             labels.
         '''
         self.data_root = cfg['data_root']
         self.split = split
-        self.upsample = upsample 
-        self.transform = Compose([              
-            Resize((cfg['image_size'])),        
-            ToTensor()                         
-        ])
+        if transform:
+            self.transform = transform
+        else:
+            self.transform = A.Compose([              
+                ToTensorV2(),
+            ])  
         
         # index data into list
         self.data = []
 
         # load annotation file
-        if not self.upsample:
-            annoPath = os.path.join(
-                self.data_root,
-                'train.csv' if self.split=='train' else "val.csv"
-            )
-        else:
-            annoPath = os.path.join(
-                self.data_root,
-                'train_upsample_ant_size.csv' 
-            )
-        
+        annoPath = os.path.join(
+            self.data_root,
+            'train.'+cfg['experiment']+'.csv' if self.split=='train' else "val."+cfg['experiment']+".csv"
+        )
+
         meta = pd.read_csv(annoPath)
         meta.reset_index()
 
@@ -68,13 +69,14 @@ class SizeDataset(Dataset):
 
         # load image
         image_path = os.path.join(self.data_root, 'images', image_name)
-        img = Image.open(image_path).convert('RGB')     # the ".convert" makes sure we always get three bands in Red, Green, Blue order
+        img = np.array(Image.open(image_path).convert('RGB'))     # the ".convert" makes sure we always get three bands in Red, Green, Blue order
+        
 
-        # transform: see lines 31ff above where we define our transformations
-        img_tensor = self.transform(img)
+        img_tensor = self.transform(image=img)
+        img_tensor = img_tensor["image"]
+
 
         return img_tensor, label
-
 
 
 
@@ -89,7 +91,7 @@ class SimpleDataset(Dataset):
         self.split = split
         self.upsample = upsample 
         self.transform = Compose([              
-            Resize((cfg['image_size'])),        
+            Resize((cfg['image_size'])), 
             ToTensor()                         
         ])
         
@@ -137,3 +139,22 @@ class SimpleDataset(Dataset):
         img_tensor = self.transform(img)
 
         return img_tensor, label
+
+
+
+class Transform():
+    def __init__(self, cfg):
+
+        self.transform = A.Compose([
+            A.Rotate(-360, 360),
+            A.Flip(cfg['flip_prob']),
+            A.Sharpen(alpha=(0.2, 0.5), 
+                      lightness=(0.5, 1.0), 
+                      p=cfg['sharp_prob']),
+            ToTensorV2()])
+        
+
+    def __call__(self, img):
+        return self.transform(img)
+
+

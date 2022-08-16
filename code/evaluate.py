@@ -130,7 +130,7 @@ def main():
     config = glob(outdir+'/*.yaml')[0]
 
     # load config
-    print(f'Using config "{config}" and using "{args.split}" set')
+    print(f'Using config "{config}" and "{args.split}" set')
     cfg = yaml.safe_load(open(config, 'r'))
 
     # setup dataloader
