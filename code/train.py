@@ -22,6 +22,9 @@ from torch.utils.tensorboard import SummaryWriter
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
 
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
+import matplotlib.pyplot as plt
+
 # let's import our own classes and functions!
 from dataset import SizeDataset, Transform
 from model import CustomResNet18
@@ -59,6 +62,20 @@ def create_outdir(cfg, folder):
     
     # copy config file to save model settings
     shutil.copy(cfg, folder)
+
+
+
+
+def save_confusion_matrix(y_true, y_pred, outdir, epoch, split):
+    # make figures folder if not there
+    os.makedirs(outdir+'/figs', exist_ok=True)
+
+    cm = confusion_matrix(y_true, y_pred)
+    disp = ConfusionMatrixDisplay(cm)
+    disp.plot()
+    plt.savefig(outdir+'/figs/confusion_matrix_epoch'+str(epoch)+'_'+str(split)+'.png', facecolor="white")
+    
+    return cm
 
 
 
@@ -113,7 +130,7 @@ def setup_optimizer(cfg, model):
 
 
 
-def train(cfg, dataLoader, model, optimizer, epoch):
+def train(cfg, dataLoader, model, optimizer, epoch, outdir):
     '''
         Our actual training function.
     '''
@@ -136,6 +153,11 @@ def train(cfg, dataLoader, model, optimizer, epoch):
 
     # iterate over dataLoader
     progressBar = trange(len(dataLoader))
+
+    # create list for labels
+    all_labels = []
+    pred_labels = []
+
     for idx, (data, labels) in enumerate(dataLoader):       # see the last line of file "dataset.py" where we return the image tensor (data) and label
         #step = idx + (epoch - 1)*idx
 
@@ -151,8 +173,6 @@ def train(cfg, dataLoader, model, optimizer, epoch):
         # loss
         loss = criterion(prediction, labels)
 
-        #writer.add_scalar("Loss/train", loss, step)
-
         # backward pass (calculate gradients of current batch)
         loss.backward()
 
@@ -166,9 +186,12 @@ def train(cfg, dataLoader, model, optimizer, epoch):
         oa = torch.mean((pred_label == labels).float()) # OA: number of correct predictions divided by batch size (i.e., average/mean)
         oa_total += oa.item()
 
+        all_labels.append(labels)
+        pred_labels.append(pred_label)
+
         # fuzzy accuracy
-        fa = torch.mean((pred_label == labels-1).float())
-        fa_total += fa.item()
+        #fa = torch.mean((pred_label == labels-1).float())
+        #fa_total += fa.item()
 
         progressBar.set_description(
             '[Train] Loss: {:.2f}; OA: {:.2f}%'.format(
@@ -181,18 +204,21 @@ def train(cfg, dataLoader, model, optimizer, epoch):
     #IPython.embed()
     # end of epoch; finalize
     progressBar.close()
-    loss_total /= len(dataLoader)           # shorthand notation for: loss_total = loss_total / len(dataLoader)
+    loss_total /= len(dataLoader)           
     writer.add_scalar("Loss/train", loss_total, epoch)
     oa_total /= len(dataLoader)
     writer.add_scalar("Acc/train", oa_total, epoch)
-    fa_total /= len(dataLoader)
-    writer.add_scalar("Fa/val", fa_total, epoch)
+    #fa_total /= len(dataLoader)
+    #writer.add_scalar("Fa/val", fa_total, epoch)
+
+    # save confusion matrix
+    save_confusion_matrix(all_labels, pred_labels, outdir, epoch, "train")
 
     return loss_total, oa_total
 
 
 
-def validate(cfg, dataLoader, model, epoch):
+def validate(cfg, dataLoader, model, epoch, outdir):
     '''
         Validation function. Note that this looks almost the same as the training
         function, except that we don't use any optimizer or gradient steps.
@@ -212,6 +238,10 @@ def validate(cfg, dataLoader, model, epoch):
 
     # iterate over dataLoader
     progressBar = trange(len(dataLoader))
+
+    # create label list
+    all_labels = []
+    pred_labels = []
     
     with torch.no_grad():               # don't calculate intermediate gradient steps: we don't need them, so this saves memory and is faster
         for idx, (data, labels) in enumerate(dataLoader):
@@ -236,6 +266,9 @@ def validate(cfg, dataLoader, model, epoch):
             #fa = torch.mean((pred_label == labels-1).float())
             #fa_total += fa.item()
 
+            all_labels.append(labels)
+            pred_labels.append(pred_label)
+
             progressBar.set_description(
                 '[Val] Loss: {:.2f}; OA: {:.2f}%'.format(
                     loss_total/(idx+1),
@@ -252,6 +285,8 @@ def validate(cfg, dataLoader, model, epoch):
     writer.add_scalar("Acc/val", oa_total, epoch)
     #fa_total /= len(dataLoader)
     #writer.add_scalar("Fa/val", fa_total, epoch)
+
+    save_confusion_matrix(all_labels, pred_labels, outdir, epoch, "val")
 
     return loss_total, oa_total
 
@@ -270,7 +305,7 @@ def main():
     cfg = yaml.safe_load(open(args.config, 'r'))
 
    #print(f'Saving results to {cfg['experiment']}')
-    outdir = os.path.join(cfg['data_root'], cfg['experiment'])
+    outdir = os.path.join('/datadrive/experiments/', cfg['experiment'])
     create_outdir(args.config, outdir)
 
     # check if GPU is available
@@ -305,8 +340,8 @@ def main():
         current_epoch += 1
         print(f'Epoch {current_epoch}/{numEpochs}')
 
-        loss_train, oa_train = train(cfg, dl_train, model, optim, current_epoch)
-        loss_val, oa_val = validate(cfg, dl_val, model, current_epoch)
+        loss_train, oa_train = train(cfg, dl_train, model, optim, current_epoch, outdir)
+        loss_val, oa_val = validate(cfg, dl_val, model, current_epoch, outdir)
 
         # combine stats and save
         stats = {
