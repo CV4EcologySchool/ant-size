@@ -130,6 +130,18 @@ def setup_optimizer(cfg, model):
 
 
 
+def get_fuzzy_accuracy(y_true, y_pred):
+    facc = 0
+    for true, pred in zip(y_true, y_pred):
+        if pred in range(true - 1, true + 1, 1):
+            facc += 1
+    
+    facc /= len(y_true)
+
+    return facc
+
+
+
 def train(cfg, dataLoader, model, optimizer, epoch, outdir):
     '''
         Our actual training function.
@@ -155,7 +167,7 @@ def train(cfg, dataLoader, model, optimizer, epoch, outdir):
     progressBar = trange(len(dataLoader))
 
     # create list for labels
-    all_labels = []
+    true_labels = []
     pred_labels = []
 
     for idx, (data, labels) in enumerate(dataLoader):       # see the last line of file "dataset.py" where we return the image tensor (data) and label
@@ -186,10 +198,11 @@ def train(cfg, dataLoader, model, optimizer, epoch, outdir):
         oa = torch.mean((pred_label == labels).float()) # OA: number of correct predictions divided by batch size (i.e., average/mean)
         oa_total += oa.item()
 
-        all_labels.append(labels)
-        pred_labels.append(pred_label)
+        true_labels.extend(labels.numpy().tolist())
+        pred_labels.extend(pred_label.numpy().tolist())
 
         # fuzzy accuracy
+        
         #fa = torch.mean((pred_label == labels-1).float())
         #fa_total += fa.item()
 
@@ -200,19 +213,19 @@ def train(cfg, dataLoader, model, optimizer, epoch, outdir):
             )
         )
         progressBar.update(1)
-    import IPython
-    IPython.embed()
+    #import IPython
+    #IPython.embed()
     # end of epoch; finalize
     progressBar.close()
     loss_total /= len(dataLoader)           
     writer.add_scalar("Loss/train", loss_total, epoch)
     oa_total /= len(dataLoader)
     writer.add_scalar("Acc/train", oa_total, epoch)
-    #fa_total /= len(dataLoader)
-    #writer.add_scalar("Fa/val", fa_total, epoch)
+    fa = get_fuzzy_accuracy(true_labels, pred_labels)
+    writer.add_scalar("Fa/train", fa, epoch)
 
     # save confusion matrix
-    save_confusion_matrix(all_labels, pred_labels, outdir, epoch, "train")
+    save_confusion_matrix(true_labels, pred_labels, outdir, epoch, "train")
 
     return loss_total, oa_total
 
@@ -240,7 +253,7 @@ def validate(cfg, dataLoader, model, epoch, outdir):
     progressBar = trange(len(dataLoader))
 
     # create label list
-    all_labels = []
+    true_labels = []
     pred_labels = []
     
     with torch.no_grad():               # don't calculate intermediate gradient steps: we don't need them, so this saves memory and is faster
@@ -262,12 +275,8 @@ def validate(cfg, dataLoader, model, epoch, outdir):
             oa = torch.mean((pred_label == labels).float())
             oa_total += oa.item()
 
-            # fuzzy accuracy
-            #fa = torch.mean((pred_label == labels-1).float())
-            #fa_total += fa.item()
-
-            all_labels.append(labels)
-            pred_labels.append(pred_label)
+            true_labels.append(labels.numpy().tolist())
+            pred_labels.append(pred_label.numpy().tolist())
 
             progressBar.set_description(
                 '[Val] Loss: {:.2f}; OA: {:.2f}%'.format(
@@ -283,10 +292,11 @@ def validate(cfg, dataLoader, model, epoch, outdir):
     writer.add_scalar("Loss/val", loss_total, epoch)
     oa_total /= len(dataLoader)
     writer.add_scalar("Acc/val", oa_total, epoch)
-    #fa_total /= len(dataLoader)
-    #writer.add_scalar("Fa/val", fa_total, epoch)
+    fa = get_fuzzy_accuracy(true_labels, pred_labels)
+    writer.add_scalar("Fa/train", fa, epoch)
 
-    save_confusion_matrix(all_labels, pred_labels, outdir, epoch, "val")
+    # save confusion matrix
+    save_confusion_matrix(true_labels, pred_labels, outdir, epoch, "val")
 
     return loss_total, oa_total
 
