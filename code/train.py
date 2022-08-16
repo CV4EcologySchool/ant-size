@@ -289,7 +289,7 @@ def main():
         A.Rotate(-cfg['rotate_deg'], cfg['rotate_deg']),
         A.Flip(cfg['flip_prob']),
         A.ToSepia(p=cfg['sepia_prob']),
-        ToTensorV2()
+        ToTensorV2(),
         torch.Tensor.double()
     ])
 
