@@ -34,7 +34,6 @@ class SizeDataset(Dataset):
             self.transform = A.Compose([ 
                 A.ToFloat(max_value=255.0),             
                 ToTensorV2(),
-                #torch.Tensor.double()
             ])  
         
         # index data into list

@@ -46,7 +46,7 @@ def create_dataloader(cfg, split='train', transforms=None, batch=None):
     dataLoader = DataLoader(
             dataset=dataset_instance,
             batch_size=batch,
-            shuffle=False,
+            shuffle=True,
             num_workers=cfg['num_workers']
         )
     return dataLoader
@@ -66,14 +66,15 @@ def create_outdir(cfg, folder):
 
 
 
-def save_confusion_matrix(y_true, y_pred, outdir, epoch, split):
+def save_confusion_matrix(y_true, y_pred, acc, outdir, epoch, split):
     # make figures folder if not there
     os.makedirs(outdir+'/figs', exist_ok=True)
 
     cm = confusion_matrix(y_true, y_pred)
     disp = ConfusionMatrixDisplay(cm)
     disp.plot()
-    plt.savefig(outdir+'/figs/confusion_matrix_epoch'+str(epoch)+'_'+str(split)+'.png', facecolor="white")
+    plt.title("Accuracy: {:.2f}".format(acc))
+    plt.savefig('{}/figs/confusion_matrix_epoch{:02d}_{}.png'.format(outdir, epoch, split), facecolor="white")
     
     return cm
 
@@ -222,10 +223,10 @@ def train(cfg, dataLoader, model, optimizer, epoch, outdir):
     oa_total /= len(dataLoader)
     writer.add_scalar("Acc/train", oa_total, epoch)
     fa = get_fuzzy_accuracy(true_labels, pred_labels)
-    writer.add_scalar("Fa/train", fa, epoch)
+    writer.add_scalar("Fa/val", fa, epoch)
 
     # save confusion matrix
-    save_confusion_matrix(true_labels, pred_labels, outdir, epoch, "train")
+    save_confusion_matrix(true_labels, pred_labels, oa_total, outdir, epoch, "train")
 
     return loss_total, oa_total
 
@@ -296,7 +297,7 @@ def validate(cfg, dataLoader, model, epoch, outdir):
     writer.add_scalar("Fa/train", fa, epoch)
 
     # save confusion matrix
-    save_confusion_matrix(true_labels, pred_labels, outdir, epoch, "val")
+    save_confusion_matrix(true_labels, pred_labels, oa_total, outdir, epoch, "val")
 
     return loss_total, oa_total
 
@@ -326,12 +327,14 @@ def main():
 
     # create tranformation
     transforms = A.Compose([
-        A.ToFloat(max_value=255.0),
         A.Rotate(-cfg['rotate_deg'], cfg['rotate_deg']),
-        A.Flip(cfg['flip_prob']),
-        #A.ToSepia(p=cfg['sepia_prob']),
-        ToTensorV2(),
-        #torch.Tensor.double()
+        A.Flip(p=0.5),
+        A.ColorJitter(p=1),
+        A.CoarseDropout(p=1, max_height=15, max_width=15, max_holes=4),
+        A.GaussNoise(p=1),
+        A.ToSepia(p=0.3),
+        A.ToFloat(max_value=255.0),  
+        ToTensorV2()
     ])
 
     # initialize data loaders for training and validation set
