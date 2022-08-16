@@ -7,9 +7,9 @@ device: cuda
 num_workers: 4
 
 # dataset parameters
-data_root: ../data/antmass/
+data_root: /datadrive/antmass/
 num_classes: 5
-experiment: unb.5class.augment
+experiment: unb.5class.0.1augment.shuffle
 perc_split: 0.2
 
 # training hyperparameters
