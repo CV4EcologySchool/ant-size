@@ -290,7 +290,7 @@ def main():
         A.Flip(cfg['flip_prob']),
         A.ToSepia(p=cfg['sepia_prob']),
         ToTensorV2(),
-        torch.Tensor.double()
+        #torch.Tensor.double()
     ])
 
     # initialize data loaders for training and validation set
