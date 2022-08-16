@@ -21,14 +21,14 @@ torch.manual_seed(42)
 
 class SizeDataset(Dataset):
 
-    def __init__(self, cfg, transform=None, split='train'):
+    def __init__(self, cfg, split='train', transform=None):
         '''
             Constructor. Here, we collect and index the dataset inputs and
             labels.
         '''
         self.data_root = cfg['data_root']
         self.split = split
-        if transform not None:
+        if transform:
             self.transform = transform
         else:
             self.transform = A.Compose([              
