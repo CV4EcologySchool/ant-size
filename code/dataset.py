@@ -71,7 +71,7 @@ class SizeDataset(Dataset):
 
         # load image
         image_path = os.path.join(self.data_root, 'images', image_name)
-        img = np.array(Image.open(image_path)).astype(np.uint8)     # the ".convert" makes sure we always get three bands in Red, Green, Blue order
+        img = np.array(Image.open(image_path).convert('RGB'))    # the ".convert" makes sure we always get three bands in Red, Green, Blue order
         
 
         img_tensor = self.transform(image=img)
