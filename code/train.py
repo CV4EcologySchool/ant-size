@@ -235,7 +235,6 @@ def validate(cfg, dataLoader, model, epoch):
             oa_total += oa.item()
 
             # fuzzy accuracy
-            for(true, pred) in zip(labels, pred_label)
             fa = torch.mean((pred_label == labels-1).float())
             fa_total += fa.item()
 
