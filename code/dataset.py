@@ -28,7 +28,7 @@ class SizeDataset(Dataset):
         '''
         self.data_root = cfg['data_root']
         self.split = split
-        if transform:
+        if transform not None:
             self.transform = transform
         else:
             self.transform = A.Compose([              
