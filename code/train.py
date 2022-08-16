@@ -200,8 +200,8 @@ def train(cfg, dataLoader, model, optimizer, epoch, outdir):
             )
         )
         progressBar.update(1)
-    #import IPython
-    #IPython.embed()
+    import IPython
+    IPython.embed()
     # end of epoch; finalize
     progressBar.close()
     loss_total /= len(dataLoader)           
