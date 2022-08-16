@@ -167,9 +167,7 @@ def train(cfg, dataLoader, model, optimizer, epoch):
         oa_total += oa.item()
 
         # fuzzy accuracy
-        fa = torch.mean((pred_label == labels | 
-                        pred_label == labels-1 | 
-                        pred_label == labels+1).float())
+        fa = torch.mean((pred_label == labels-1).float())
         fa_total += fa.item()
 
         progressBar.set_description(
@@ -235,8 +233,8 @@ def validate(cfg, dataLoader, model, epoch):
             oa_total += oa.item()
 
             # fuzzy accuracy
-            fa = torch.mean((pred_label == labels-1).float())
-            fa_total += fa.item()
+            #fa = torch.mean((pred_label == labels-1).float())
+            #fa_total += fa.item()
 
             progressBar.set_description(
                 '[Val] Loss: {:.2f}; OA: {:.2f}%'.format(
@@ -252,8 +250,8 @@ def validate(cfg, dataLoader, model, epoch):
     writer.add_scalar("Loss/val", loss_total, epoch)
     oa_total /= len(dataLoader)
     writer.add_scalar("Acc/val", oa_total, epoch)
-    fa_total /= len(dataLoader)
-    writer.add_scalar("Fa/val", fa_total, epoch)
+    #fa_total /= len(dataLoader)
+    #writer.add_scalar("Fa/val", fa_total, epoch)
 
     return loss_total, oa_total
 
