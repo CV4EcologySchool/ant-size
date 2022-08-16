@@ -39,7 +39,7 @@ def create_dataloader(cfg, split='train', transforms=None, batch=None):
         batch = cfg['batch_size']
 
     #transforms = Transform()
-    dataset_instance = SizeDataset(cfg, split, transforms)        
+    dataset_instance = SizeDataset(cfg, split, transform=transforms)        
     dataLoader = DataLoader(
             dataset=dataset_instance,
             batch_size=batch,
