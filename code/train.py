@@ -285,7 +285,7 @@ def main():
 
     # create tranformation
     transforms = A.Compose([
-        A.ToFloat(max_value=255.0)
+        A.ToFloat(max_value=255.0),
         A.Rotate(-cfg['rotate_deg'], cfg['rotate_deg']),
         A.Flip(cfg['flip_prob']),
         A.ToSepia(p=cfg['sepia_prob']),
