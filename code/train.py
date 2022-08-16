@@ -133,7 +133,7 @@ def setup_optimizer(cfg, model):
 def get_fuzzy_accuracy(y_true, y_pred):
     facc = 0
     for true, pred in zip(y_true, y_pred):
-        if pred in range(true - 1, true + 1, 1):
+        if int(pred) in range(int(true) - 1, int(true) + 1, 1):
             facc += 1
     
     facc /= len(y_true)
