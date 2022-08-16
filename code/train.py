@@ -132,7 +132,7 @@ def train(cfg, dataLoader, model, optimizer, epoch):
     criterion = nn.CrossEntropyLoss()
 
     # running averages
-    loss_total, oa_total = 0.0, 0.0                         # for now, we just log the loss and overall accuracy (OA)
+    loss_total, oa_total, fa_total = 0.0, 0.0, 0.0                         # for now, we just log the loss and overall accuracy (OA)
 
     # iterate over dataLoader
     progressBar = trange(len(dataLoader))
