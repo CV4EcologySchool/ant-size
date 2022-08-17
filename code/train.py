@@ -229,7 +229,7 @@ def train(cfg, dataLoader, model, optimizer, epoch, outdir, writer):
     # save confusion matrix
     save_confusion_matrix(true_labels, pred_labels, oa_total, outdir, epoch, "train")
 
-    return loss_total, oa_total
+    return loss_total, oa_total, fa
 
 
 
