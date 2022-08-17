@@ -26,7 +26,7 @@ from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 import matplotlib.pyplot as plt
 
 # let's import our own classes and functions!
-from dataset import SizeDataset, Transform
+from dataset import SizeDataset
 from model import CustomResNet18
 
 
