@@ -22,7 +22,7 @@ weight_decay: 0.001
 # augmentation hyperparameters
 rotate_deg: 360
 flip_prob: 0.5
-sepia_prob: 0.2
+sepia_prob: 0.1
 color_jitter: 0.1
 dropout: 0.1
 noise: 0.1

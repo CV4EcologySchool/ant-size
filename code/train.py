@@ -29,9 +29,6 @@ import matplotlib.pyplot as plt
 from dataset import SizeDataset, Transform
 from model import CustomResNet18
 
-# show model progress on tensorboard
-writer = SummaryWriter()
-
 
 def create_dataloader(cfg, split='train', transforms=None, batch=None):
     '''
@@ -75,6 +72,7 @@ def save_confusion_matrix(y_true, y_pred, acc, outdir, epoch, split):
     disp.plot()
     plt.title("Accuracy: {:.2f}".format(acc))
     plt.savefig('{}/figs/confusion_matrix_epoch{:02d}_{}.png'.format(outdir, epoch, split), facecolor="white")
+    plt.clf() # clear plot to reduce memory usages
     
     return cm
 
@@ -304,7 +302,6 @@ def validate(cfg, dataLoader, model, epoch, outdir):
 
 
 def main():
-
     # Argument parser for command-line arguments:
     # python ct_classifier/train.py --config configs/exp_resnet18.yaml
     parser = argparse.ArgumentParser(description='Train deep learning model.')
@@ -314,6 +311,9 @@ def main():
     # load config
     print(f'Using config "{args.config}"')
     cfg = yaml.safe_load(open(args.config, 'r'))
+
+    # show model progress on tensorboard
+    writer = SummaryWriter(comment=cfg['experiment'])
 
    #print(f'Saving results to {cfg['experiment']}')
     outdir = os.path.join('/datadrive/experiments/', cfg['experiment'])
@@ -328,11 +328,11 @@ def main():
     # create tranformation
     transforms = A.Compose([
         A.Rotate(-cfg['rotate_deg'], cfg['rotate_deg']),
-        A.Flip(p=0.5),
-        A.ColorJitter(p=1),
-        A.CoarseDropout(p=1, max_height=15, max_width=15, max_holes=4),
-        A.GaussNoise(p=1),
-        A.ToSepia(p=0.3),
+        A.Flip(p=cfg['flip_prob']),
+        A.ColorJitter(p=cfg['color_jitter']),
+        A.CoarseDropout(p=cfg['dropout'], max_height=15, max_width=15, max_holes=4),
+        A.GaussNoise(p=cfg['noise']),
+        A.ToSepia(p=cfg['sepia']),
         A.ToFloat(max_value=255.0),  
         ToTensorV2()
     ])

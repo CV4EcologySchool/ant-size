@@ -145,11 +145,11 @@ def main():
     print("Accuracy of model is {:0.2f}".format(acc))
     
     # get fuzzy accuracy
-    facc = get_fuzzy_accuracy(labels, predict_labels)
-    print("Accuracy within 1 class is {:0.2f}".format(facc))
+    #facc = get_fuzzy_accuracy(labels, predict_labels)
+    #print("Accuracy within 1 class is {:0.2f}".format(facc))
 
     # confusion matrix
-    cm = save_confusion_matrix(labels, predict_labels, outdir, epoch, args.split)
+    #cm = save_confusion_matrix(labels, predict_labels, outdir, epoch, args.split)
 
     # save list of predictions with filename
     df = create_results(fn, predictions, labels, predict_labels)
