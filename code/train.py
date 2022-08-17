@@ -141,12 +141,10 @@ def get_fuzzy_accuracy(y_true, y_pred):
 
 
 
-def train(cfg, dataLoader, model, optimizer, epoch, outdir):
+def train(cfg, dataLoader, model, optimizer, epoch, outdir, writer):
     '''
         Our actual training function.
     '''
-     # show model progress on tensorboard
-    writer = SummaryWriter(comment=cfg['experiment'])
 
     device = cfg['device']
 
@@ -232,14 +230,11 @@ def train(cfg, dataLoader, model, optimizer, epoch, outdir):
 
 
 
-def validate(cfg, dataLoader, model, epoch, outdir):
+def validate(cfg, dataLoader, model, epoch, outdir, writer):
     '''
         Validation function. Note that this looks almost the same as the training
         function, except that we don't use any optimizer or gradient steps.
     '''
-     # show model progress on tensorboard
-    writer = SummaryWriter(comment=cfg['experiment'])
-    
     device = cfg['device']
     model.to(device)
 
@@ -312,6 +307,8 @@ def main():
     parser.add_argument('--config', help='Path to config file', default='../configs/ant_size.yaml')
     args = parser.parse_args()
 
+    writer = SummaryWriter(comment=cfg['experiment'])
+
     # load config
     print(f'Using config "{args.config}"')
     cfg = yaml.safe_load(open(args.config, 'r'))
@@ -354,8 +351,8 @@ def main():
         current_epoch += 1
         print(f'Epoch {current_epoch}/{numEpochs}')
 
-        loss_train, oa_train = train(cfg, dl_train, model, optim, current_epoch, outdir)
-        loss_val, oa_val = validate(cfg, dl_val, model, current_epoch, outdir)
+        loss_train, oa_train = train(cfg, dl_train, model, optim, current_epoch, outdir, writer)
+        loss_val, oa_val = validate(cfg, dl_val, model, current_epoch, outdir, writer)
 
         # combine stats and save
         stats = {
