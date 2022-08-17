@@ -145,6 +145,8 @@ def train(cfg, dataLoader, model, optimizer, epoch, outdir):
     '''
         Our actual training function.
     '''
+     # show model progress on tensorboard
+    writer = SummaryWriter(comment=cfg['experiment'])
 
     device = cfg['device']
 
@@ -221,7 +223,7 @@ def train(cfg, dataLoader, model, optimizer, epoch, outdir):
     oa_total /= len(dataLoader)
     writer.add_scalar("Acc/train", oa_total, epoch)
     fa = get_fuzzy_accuracy(true_labels, pred_labels)
-    writer.add_scalar("Fa/val", fa, epoch)
+    writer.add_scalar("Fa/train", fa, epoch)
 
     # save confusion matrix
     save_confusion_matrix(true_labels, pred_labels, oa_total, outdir, epoch, "train")
@@ -235,6 +237,8 @@ def validate(cfg, dataLoader, model, epoch, outdir):
         Validation function. Note that this looks almost the same as the training
         function, except that we don't use any optimizer or gradient steps.
     '''
+     # show model progress on tensorboard
+    writer = SummaryWriter(comment=cfg['experiment'])
     
     device = cfg['device']
     model.to(device)
@@ -311,9 +315,6 @@ def main():
     # load config
     print(f'Using config "{args.config}"')
     cfg = yaml.safe_load(open(args.config, 'r'))
-
-    # show model progress on tensorboard
-    writer = SummaryWriter(comment=cfg['experiment'])
 
    #print(f'Saving results to {cfg['experiment']}')
     outdir = os.path.join('/datadrive/experiments/', cfg['experiment'])
