@@ -130,9 +130,12 @@ def setup_optimizer(cfg, model):
 
 
 def get_fuzzy_accuracy(y_true, y_pred):
+    '''
+        Returns proportion within one class of accuracy.
+    '''
     facc = 0
     for true, pred in zip(y_true, y_pred):
-        if pred in range(true - 1, true + 1, 1):
+        if pred in range(true - 1, true + 2, 1): # +2 to include upper bound
             facc += 1
     
     facc /= len(y_true)
@@ -296,7 +299,7 @@ def validate(cfg, dataLoader, model, epoch, outdir, writer):
     # save confusion matrix
     save_confusion_matrix(true_labels, pred_labels, oa_total, outdir, epoch, "val")
 
-    return loss_total, oa_total
+    return loss_total, oa_total, fa
 
 
 
@@ -351,15 +354,17 @@ def main():
         current_epoch += 1
         print(f'Epoch {current_epoch}/{numEpochs}')
 
-        loss_train, oa_train = train(cfg, dl_train, model, optim, current_epoch, outdir, writer)
-        loss_val, oa_val = validate(cfg, dl_val, model, current_epoch, outdir, writer)
+        loss_train, oa_train, fa_train = train(cfg, dl_train, model, optim, current_epoch, outdir, writer)
+        loss_val, oa_val, fa_val = validate(cfg, dl_val, model, current_epoch, outdir, writer)
 
         # combine stats and save
         stats = {
             'loss_train': loss_train,
             'loss_val': loss_val,
             'oa_train': oa_train,
-            'oa_val': oa_val
+            'oa_val': oa_val,
+            'fa_train': fa_train,
+            'fa_val': fa_val
         }
         save_model(current_epoch, model, stats, outdir)
 
