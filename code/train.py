@@ -307,11 +307,11 @@ def main():
     parser.add_argument('--config', help='Path to config file', default='../configs/ant_size.yaml')
     args = parser.parse_args()
 
-    writer = SummaryWriter(comment=cfg['experiment'])
-
     # load config
     print(f'Using config "{args.config}"')
     cfg = yaml.safe_load(open(args.config, 'r'))
+
+    writer = SummaryWriter(comment=cfg['experiment'])
 
    #print(f'Saving results to {cfg['experiment']}')
     outdir = os.path.join('/datadrive/experiments/', cfg['experiment'])
