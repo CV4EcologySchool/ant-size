@@ -142,19 +142,8 @@ class SimpleDataset(Dataset):
 
 
 
-class Transform():
-    def __init__(self, cfg):
 
-        self.transform = A.Compose([
-            A.Rotate(-360, 360),
-            A.Flip(cfg['flip_prob']),
-            A.Sharpen(alpha=(0.2, 0.5), 
-                      lightness=(0.5, 1.0), 
-                      p=cfg['sharp_prob']),
-            ToTensorV2()])
-        
-
-    def __call__(self, img):
-        return self.transform(img)
+  # if scale_data:
+  #        X = StandardScaler().fit_transform(X) scale data
 
 
