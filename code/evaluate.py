@@ -114,6 +114,54 @@ def create_results(files, predictions, y_true, y_pred):
 
 
 
+def get_model_outputs(outdir):
+    keys = ['epoch', 'loss_train', 'loss_val', 'oa_train', 'oa_val']
+    output_dict = {k: [] for k in keys}
+
+    model_states = glob(outdir+'/model_states/*.pt')
+
+    for m in model_states:
+        state = torch.load(open(m, 'rb'))
+        output_dict['epoch'].append(int(os.path.basename(m).split('.')[0]))
+        output_dict['loss_train'].append(state['loss_train'])
+        output_dict['loss_val'].append(state['loss_val'])
+        output_dict['oa_train'].append(state['oa_train'])
+        output_dict['oa_val'].append(state['oa_val'])
+
+    output_dict['epoch'].sort()
+    
+    return output_dict
+
+
+def save_acc_plot(results, outdir):
+    os.makedirs(outdir+'/figs', exist_ok=True)
+
+    plt.rcParams['figure.figsize'] = [8, 5]
+    plt.rcParams['figure.dpi'] = 300    
+    plt.plot(results['epoch'], results['oa_train'], color="blue", label="train")
+    plt.plot(results['epoch'], results['oa_val'], color="red", label="val")
+    plt.xlabel('epoch')
+    plt.ylabel('overall accuracy')
+    plt.legend()
+    plt.grid()
+    plt.savefig(outdir+'/figs/accuracy.png', facecolor="white")
+
+
+def save_loss_plot(results, outdir):
+    os.makedirs(outdir+'/figs', exist_ok=True)
+
+    plt.rcParams['figure.figsize'] = [8, 5]
+    plt.rcParams['figure.dpi'] = 300    
+
+    plt.plot(results['epoch'], results['loss_train'], color="blue", label="train")
+    plt.plot(results['epoch'], results['loss_val'], color="red", label="val")
+    plt.xlabel('epoch')
+    plt.ylabel('loss')
+    plt.legend()
+    plt.grid()
+    plt.savefig(outdir+'/figs/loss.png', facecolor="white")
+
+
 def main():
     # Argument parser for command-line arguments:
     # python code/train.py --output model_runs
@@ -133,16 +181,22 @@ def main():
     print(f'Using config "{config}" and "{args.split}" set')
     cfg = yaml.safe_load(open(config, 'r'))
 
+    # get model outputs across epochs
+    out_dic = get_model_outputs(outdir)
+    save_loss_plot(out_dic, outdir)
+    save_acc_plot(out_dic, outdir)
+
+
     # setup dataloader
-    dl_val = create_dataloader(cfg, split=args.split, batch=1)
+    # dl_val = create_dataloader(cfg, split=args.split, batch=1)
 
     # load model and predict from model
-    model, epoch = load_model(cfg, outdir, args.epoch)
-    fn, predictions, predict_labels, labels = predict(dl_val, model)   
+    # model, epoch = load_model(cfg, outdir, args.epoch)
+    # fn, predictions, predict_labels, labels = predict(dl_val, model)   
     
     # get accuracy score
-    acc = accuracy_score(labels, predict_labels)
-    print("Accuracy of model is {:0.2f}".format(acc))
+    # acc = accuracy_score(labels, predict_labels)
+    # print("Accuracy of model is {:0.2f}".format(acc))
     
     # get fuzzy accuracy
     #facc = get_fuzzy_accuracy(labels, predict_labels)
@@ -152,8 +206,8 @@ def main():
     #cm = save_confusion_matrix(labels, predict_labels, outdir, epoch, args.split)
 
     # save list of predictions with filename
-    df = create_results(fn, predictions, labels, predict_labels)
-    df.to_csv(outdir+'/results_epoch'+str(epoch)+'_'+str(args.split)+'.csv', index = False)
+    # df = create_results(fn, predictions, labels, predict_labels)
+    # df.to_csv(outdir+'/results_epoch'+str(epoch)+'_'+str(args.split)+'.csv', index = False)
 
     # precision recall curve
 
