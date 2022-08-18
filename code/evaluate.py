@@ -85,7 +85,7 @@ def get_fuzzy_accuracy(y_true, y_pred):
 
 
 
-def save_confusion_matrix(y_true, y_pred, outdir, epoch, split):
+def save_un_confusion_matrix(y_true, y_pred, outdir, epoch, split):
     # make figures folder if not there
     os.makedirs(outdir+'/figs', exist_ok=True)
 
@@ -131,6 +131,22 @@ def get_model_outputs(outdir):
     output_dict['epoch'].sort()
     
     return output_dict
+
+
+
+def save_confusion_matrix(y_true, y_pred, acc, outdir, epoch, split):
+    # make figures folder if not there
+    os.makedirs(outdir+'/figs', exist_ok=True)
+
+    cm = confusion_matrix(y_true, y_pred, normalize="true")
+    disp = ConfusionMatrixDisplay(cm)
+    disp.plot()
+    plt.title("Accuracy: {:.2f}".format(acc))
+    plt.savefig('{}/figs/confusion_matrix_epoch{:02d}_{}.png'.format(outdir, epoch, split), facecolor="white")
+    plt.clf() # clear plot to reduce memory usages
+    
+    return cm
+
 
 
 def save_acc_plot(results, outdir):
@@ -187,34 +203,32 @@ def main():
     cfg = yaml.safe_load(open(config, 'r'))
 
     # get model outputs across epochs
-    out_dic = get_model_outputs(outdir)
-    save_loss_plot(out_dic, outdir)
-    save_acc_plot(out_dic, outdir)
+    #out_dic = get_model_outputs(outdir)
+    #save_loss_plot(out_dic, outdir)
+    #save_acc_plot(out_dic, outdir)
 
 
     # setup dataloader
-    # dl_val = create_dataloader(cfg, split=args.split, batch=1)
+    dl = create_dataloader(cfg, split=args.split, batch=1)
 
     # load model and predict from model
-
-
-    # model, epoch = load_model(cfg, outdir, args.epoch)
-    # fn, predictions, predict_labels, labels = predict(dl_val, model)   
+    model, epoch = load_model(cfg, outdir, args.epoch)
+    fn, predictions, predict_labels, labels = predict(dl, model)   
     
     # get accuracy score
-    # acc = accuracy_score(labels, predict_labels)
-    # print("Accuracy of model is {:0.2f}".format(acc))
+    acc = accuracy_score(labels, predict_labels)
+    print("Accuracy of model is {:0.2f}".format(acc))
     
     # get fuzzy accuracy
-    #facc = get_fuzzy_accuracy(labels, predict_labels)
-    #print("Accuracy within 1 class is {:0.2f}".format(facc))
+    facc = get_fuzzy_accuracy(labels, predict_labels)
+    print("Accuracy within 1 class is {:0.2f}".format(facc))
 
     # confusion matrix
-    #cm = save_confusion_matrix(labels, predict_labels, outdir, epoch, args.split)
+    cm = save_confusion_matrix(labels, predict_labels, acc, outdir, epoch, args.split)
 
     # save list of predictions with filename
-    # df = create_results(fn, predictions, labels, predict_labels)
-    # df.to_csv(outdir+'/results_epoch'+str(epoch)+'_'+str(args.split)+'.csv', index = False)
+    df = create_results(fn, predictions, labels, predict_labels)
+    df.to_csv(outdir+'/results_epoch'+str(epoch)+'_'+str(args.split)+'.csv', index = False)
 
     # precision recall curve
 
