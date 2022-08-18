@@ -190,6 +190,8 @@ def train(cfg, dataLoader, model, optimizer, epoch, outdir, writer):
         loss = criterion(prediction, labels)
 
         # backward pass (calculate gradients of current batch)
+        import IPython
+        IPython.embed()
         loss.backward()
 
         # apply gradients to model parameters
@@ -203,7 +205,7 @@ def train(cfg, dataLoader, model, optimizer, epoch, outdir, writer):
         import IPython
         IPython.embed()
         
-        oa = MeanAbsolutePercentageError(prediction, labels)
+        #oa = MeanAbsolutePercentageError(prediction, labels)
 
         #oa_total += oa.item()
 
