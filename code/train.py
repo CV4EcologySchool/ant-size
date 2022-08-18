@@ -164,7 +164,7 @@ def train(cfg, dataLoader, model, optimizer, epoch, outdir, writer):
     criterion = nn.MSELoss()
 
     # running averages
-    loss_total, oa_total, fa_total = 0.0, 0.0, 0.0                         # for now, we just log the loss and overall accuracy (OA)
+    loss_total, mape_total, me_total = 0.0, 0.0, 0.0                         # for now, we just log the loss and overall accuracy (OA)
 
     # iterate over dataLoader
     progressBar = trange(len(dataLoader))
@@ -178,16 +178,16 @@ def train(cfg, dataLoader, model, optimizer, epoch, outdir, writer):
 
         # forward pass
         prediction = model(data)
+        prediction = prediction.unsqueeze(1).float() # need to change input size
 
         # reset gradients to zero
         optimizer.zero_grad()
 
         # loss
-        loss = criterion(prediction.float(), labels.float())
+        loss = criterion(prediction, labels.float())
 
         # backward pass (calculate gradients of current batch)
-        
-
+        loss.backward()
 
         # apply gradients to model parameters
         optimizer.step()
@@ -258,7 +258,7 @@ def validate(cfg, dataLoader, model, epoch, outdir, writer):
     criterion = nn.MSELoss()
 
     # running averages
-    loss_total, me_total, mape_total = 0.0, 0.0     # for now, we just log the loss and overall accuracy (OA)
+    loss_total, me_total, mape_total = 0.0, 0.0, 0.0     # for now, we just log the loss and overall accuracy (OA)
 
     # iterate over dataLoader
     progressBar = trange(len(dataLoader))
