@@ -214,9 +214,9 @@ def train(cfg, dataLoader, model, optimizer, epoch, outdir, writer):
         #fa_total += fa.item()
 
         progressBar.set_description(
-            '[Train] Loss: {:.2f}; OA: {:.2f}%'.format(
+            '[Train] Loss: {:.2f}; MAPE: {:.2f}%'.format(
                 loss_total/(idx+1),
-                #100*oa_total/(idx+1)
+                mape_total/(idx+1)
             )
         )
         progressBar.update(1)
@@ -289,7 +289,7 @@ def validate(cfg, dataLoader, model, epoch, outdir, writer):
             #pred_labels.extend(prediction.numpy().tolist())
 
             progressBar.set_description(
-                '[Val] Loss: {:.2f}; OA: {:.2f}%'.format(
+                '[Val] Loss: {:.2f}; MAPE: {:.2f}%'.format(
                     loss_total/(idx+1),
                     mape_total/(idx+1)
                 )
