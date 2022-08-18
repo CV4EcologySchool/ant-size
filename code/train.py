@@ -15,7 +15,6 @@ import shutil
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
-from torchmetrics import MeanAbsolutePercentageError
 from torch.optim import SGD
 from torch.optim import lr_scheduler # add learning rate scheduling
 from torch.utils.tensorboard import SummaryWriter 
@@ -23,7 +22,7 @@ from torch.utils.tensorboard import SummaryWriter
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
 
-from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, mean_absolute_percentage_error, max_error
 import matplotlib.pyplot as plt
 
 # let's import our own classes and functions!
@@ -170,9 +169,6 @@ def train(cfg, dataLoader, model, optimizer, epoch, outdir, writer):
     # iterate over dataLoader
     progressBar = trange(len(dataLoader))
 
-    # create list for labels
-    true_labels = []
-    pred_labels = []
 
     for idx, (data, labels) in enumerate(dataLoader):       # see the last line of file "dataset.py" where we return the image tensor (data) and label
         #step = idx + (epoch - 1)*idx
@@ -191,8 +187,7 @@ def train(cfg, dataLoader, model, optimizer, epoch, outdir, writer):
 
         # backward pass (calculate gradients of current batch)
         import IPython
-        IPython.embed()
-        loss.backward()
+
 
         # apply gradients to model parameters
         optimizer.step()
@@ -202,15 +197,15 @@ def train(cfg, dataLoader, model, optimizer, epoch, outdir, writer):
 
         #pred_label = torch.argmax(prediction, dim=1)    # the predicted label is the one at position (class index) with highest predicted value
         #oa = torch.mean((pred_label == labels).float()) # OA: number of correct predictions divided by batch size (i.e., average/mean)
-        import IPython
-        IPython.embed()
+
         
-        #oa = MeanAbsolutePercentageError(prediction, labels)
+        mape_total = mean_absolute_percentage_error(labels, prediction.detach)
+        me_total =  max_error(labels, prediction.detach)
 
         #oa_total += oa.item()
 
-        true_labels.extend(labels.numpy().tolist())
-        pred_labels.extend(prediction.numpy().tolist())
+        #true_labels.extend(labels.numpy().tolist())
+        #pred_labels.extend(prediction.numpy().tolist())
 
         # fuzzy accuracy
         
@@ -229,16 +224,20 @@ def train(cfg, dataLoader, model, optimizer, epoch, outdir, writer):
     # end of epoch; finalize
     progressBar.close()
     loss_total /= len(dataLoader)           
-    #writer.add_scalar("Loss/train", loss_total, epoch)
+    writer.add_scalar("Loss/train", loss_total, epoch)
+    me_total /= len(dataLoader)
+    writer.add_scalar("ME/train", me_total, epoch)
+    mape_total /= len(dataLoader)
+    writer.add_scalar("MAPE/train", mape_total, epoch)
     #oa_total /= len(dataLoader)
     #writer.add_scalar("Acc/train", oa_total, epoch)
     #fa = get_fuzzy_accuracy(true_labels, pred_labels)
     #writer.add_scalar("Fa/train", fa, epoch)
 
     # save confusion matrix
-    save_confusion_matrix(true_labels, pred_labels, oa_total, outdir, epoch, "train")
+    #save_confusion_matrix(true_labels, pred_labels, oa_total, outdir, epoch, "train")
 
-    return loss_total
+    return loss_total, me_total, mape_total
 
 
 
@@ -258,15 +257,11 @@ def validate(cfg, dataLoader, model, epoch, outdir, writer):
     criterion = nn.MSELoss()
 
     # running averages
-    loss_total, oa_total = 0.0, 0.0     # for now, we just log the loss and overall accuracy (OA)
+    loss_total, me_total, mape_total = 0.0, 0.0     # for now, we just log the loss and overall accuracy (OA)
 
     # iterate over dataLoader
     progressBar = trange(len(dataLoader))
 
-    # create label list
-    true_labels = []
-    pred_labels = []
-    
     with torch.no_grad():               # don't calculate intermediate gradient steps: we don't need them, so this saves memory and is faster
         for idx, (data, labels) in enumerate(dataLoader):
 
@@ -286,33 +281,37 @@ def validate(cfg, dataLoader, model, epoch, outdir, writer):
             #pred_label = torch.argmax(prediction, dim=1)
             #oa = torch.mean((pred_label == labels).float())
             
-            oa = MeanAbsolutePercentageError(prediction, labels)
-            #oa_total += oa.item()
+            mape_total = mean_absolute_percentage_error(labels, prediction.detach)
+            me_total = max_error(labels, prediction.detach)
 
-            true_labels.extend(labels.numpy().tolist())
-            pred_labels.extend(prediction.numpy().tolist())
+            #true_labels.extend(labels.numpy().tolist())
+            #pred_labels.extend(prediction.numpy().tolist())
 
             progressBar.set_description(
                 '[Val] Loss: {:.2f}; OA: {:.2f}%'.format(
                     loss_total/(idx+1),
-                    #100*oa_total/(idx+1)
+                    mape_total/(idx+1)
                 )
             )
             progressBar.update(1)
     
     # end of epoch; finalize
     progressBar.close()
-    #loss_total /= len(dataLoader)
-    #writer.add_scalar("Loss/val", loss_total, epoch)
+    loss_total /= len(dataLoader)
+    writer.add_scalar("Loss/val", loss_total, epoch)
+    me_total /= len(dataLoader)
+    writer.add_scalar("ME/val", me_total, epoch)
+    mape_total /= len(dataLoader)
+    writer.add_scalar("MAPE/val", mape_total, epoch)
     #oa_total /= len(dataLoader)
     #writer.add_scalar("Acc/val", oa_total, epoch)
     #fa = get_fuzzy_accuracy(true_labels, pred_labels)
     #writer.add_scalar("Fa/val", fa, epoch)
 
     # save confusion matrix
-    save_confusion_matrix(true_labels, pred_labels, oa_total, outdir, epoch, "val")
+    #save_confusion_matrix(true_labels, pred_labels, oa_total, outdir, epoch, "val")
 
-    return loss_total
+    return loss_total, me_total, mape_total
 
 
 
@@ -368,13 +367,17 @@ def main():
         current_epoch += 1
         print(f'Epoch {current_epoch}/{numEpochs}')
 
-        loss_train = train(cfg, dl_train, model, optim, current_epoch, outdir, writer)
-        loss_val= validate(cfg, dl_val, model, current_epoch, outdir, writer)
+        loss_train, me_train, mape_train = train(cfg, dl_train, model, optim, current_epoch, outdir, writer)
+        loss_val, me_val, mape_val = validate(cfg, dl_val, model, current_epoch, outdir, writer)
 
         # combine stats and save
         stats = {
             'loss_train': loss_train,
             'loss_val': loss_val,
+            'me_train': me_train,
+            'me_val': me_val,
+            'mape_train': mape_train,
+            'mape_val': mape_val
             #'oa_train': oa_train,
             #'oa_val': oa_val,
             #'fa_train': fa_train,
