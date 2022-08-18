@@ -67,7 +67,7 @@ def save_confusion_matrix(y_true, y_pred, acc, outdir, epoch, split):
     # make figures folder if not there
     os.makedirs(outdir+'/figs', exist_ok=True)
 
-    cm = confusion_matrix(y_true, y_pred)
+    cm = confusion_matrix(y_true, y_pred, normalize=True)
     disp = ConfusionMatrixDisplay(cm)
     disp.plot()
     plt.title("Accuracy: {:.2f}".format(acc))
