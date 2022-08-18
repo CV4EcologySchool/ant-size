@@ -142,19 +142,69 @@ class SimpleDataset(Dataset):
 
 
 
-class Transform():
-    def __init__(self, cfg):
+class RegDataset(Dataset):
 
-        self.transform = A.Compose([
-            A.Rotate(-360, 360),
-            A.Flip(cfg['flip_prob']),
-            A.Sharpen(alpha=(0.2, 0.5), 
-                      lightness=(0.5, 1.0), 
-                      p=cfg['sharp_prob']),
-            ToTensorV2()])
+    def __init__(self, cfg, split='train', transform=None):
+        '''
+            Constructor. Here, we collect and index the dataset inputs and
+            labels.
+        '''
+        self.data_root = cfg['data_root']
+        self.split = split
+        if transform:
+            self.transform = transform
+        else:
+            self.transform = A.Compose([ 
+                A.ToFloat(max_value=255.0),             
+                ToTensorV2(),
+            ])  
+        
+        # index data into list
+        self.data = []
+
+        # load annotation file
+        annoPath = os.path.join(
+            self.data_root,
+            'train.'+cfg['experiment']+'.csv' if self.split=='train' else "val."+cfg['experiment']+".csv"
+        )
+
+        df = pd.read_csv(annoPath)
+        df.reset_index()
+
+        # multiply by 1000 to convert to mg
+        df['m_scaled'] = (df['mass']*1000)/(df['mass'].max()*1000 + 10)
+
+        #self.data.append([str(df['filename']), m_scaled])
+
+        for index, row in df.iterrows():   
+            # append image-label tuple to data
+            imgFileName = row['filename']
+            labelIndex = row['m_scaled']
+            self.data.append([str(imgFileName), labelIndex])
+
+    def __len__(self):
+        '''
+            Returns the length of the dataset.
+        '''
+        return len(self.data)
+
+    
+    def __getitem__(self, idx):
+        '''
+            Returns a single data point at given idx.
+            Here's where we actually load the image.
+        '''
+        image_name, label = self.data[idx]             
+
+        # load image
+        image_path = os.path.join(self.data_root, 'images', image_name)
+        img = np.array(Image.open(image_path).convert('RGB'))    # the ".convert" makes sure we always get three bands in Red, Green, Blue order
         
 
-    def __call__(self, img):
-        return self.transform(img)
+        img_tensor = self.transform(image=img)
+        img_tensor = img_tensor["image"]
+
+        return img_tensor, label
+
 
 

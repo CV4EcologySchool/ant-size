@@ -15,6 +15,7 @@ import shutil
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
+from torchmetrics import MeanAbsolutePercentageError
 from torch.optim import SGD
 from torch.optim import lr_scheduler # add learning rate scheduling
 from torch.utils.tensorboard import SummaryWriter 
@@ -26,7 +27,7 @@ from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 import matplotlib.pyplot as plt
 
 # let's import our own classes and functions!
-from dataset import SizeDataset, Transform
+from dataset import SizeDataset, RegDataset
 from model import CustomResNet18
 
 
@@ -39,7 +40,7 @@ def create_dataloader(cfg, split='train', transforms=None, batch=None):
         batch = cfg['batch_size']
 
     #transforms = Transform()
-    dataset_instance = SizeDataset(cfg, split, transform=transforms)        
+    dataset_instance = RegDataset(cfg, split, transform=transforms)        
     dataLoader = DataLoader(
             dataset=dataset_instance,
             batch_size=batch,
@@ -160,7 +161,8 @@ def train(cfg, dataLoader, model, optimizer, epoch, outdir, writer):
     model.train()
 
     # loss function
-    criterion = nn.CrossEntropyLoss()
+    #criterion = nn.CrossEntropyLoss()
+    criterion = nn.MSELoss()
 
     # running averages
     loss_total, oa_total, fa_total = 0.0, 0.0, 0.0                         # for now, we just log the loss and overall accuracy (OA)
@@ -196,12 +198,17 @@ def train(cfg, dataLoader, model, optimizer, epoch, outdir, writer):
         # log statistics
         loss_total += loss.item()                       # the .item() command retrieves the value of a single-valued tensor, regardless of its data type and device of tensor
 
-        pred_label = torch.argmax(prediction, dim=1)    # the predicted label is the one at position (class index) with highest predicted value
-        oa = torch.mean((pred_label == labels).float()) # OA: number of correct predictions divided by batch size (i.e., average/mean)
-        oa_total += oa.item()
+        #pred_label = torch.argmax(prediction, dim=1)    # the predicted label is the one at position (class index) with highest predicted value
+        #oa = torch.mean((pred_label == labels).float()) # OA: number of correct predictions divided by batch size (i.e., average/mean)
+        import IPython
+        IPython.embed()
+        
+        oa = MeanAbsolutePercentageError(prediction, labels)
+
+        #oa_total += oa.item()
 
         true_labels.extend(labels.numpy().tolist())
-        pred_labels.extend(pred_label.numpy().tolist())
+        pred_labels.extend(prediction.numpy().tolist())
 
         # fuzzy accuracy
         
@@ -211,7 +218,7 @@ def train(cfg, dataLoader, model, optimizer, epoch, outdir, writer):
         progressBar.set_description(
             '[Train] Loss: {:.2f}; OA: {:.2f}%'.format(
                 loss_total/(idx+1),
-                100*oa_total/(idx+1)
+                #100*oa_total/(idx+1)
             )
         )
         progressBar.update(1)
@@ -220,16 +227,16 @@ def train(cfg, dataLoader, model, optimizer, epoch, outdir, writer):
     # end of epoch; finalize
     progressBar.close()
     loss_total /= len(dataLoader)           
-    writer.add_scalar("Loss/train", loss_total, epoch)
-    oa_total /= len(dataLoader)
-    writer.add_scalar("Acc/train", oa_total, epoch)
-    fa = get_fuzzy_accuracy(true_labels, pred_labels)
-    writer.add_scalar("Fa/train", fa, epoch)
+    #writer.add_scalar("Loss/train", loss_total, epoch)
+    #oa_total /= len(dataLoader)
+    #writer.add_scalar("Acc/train", oa_total, epoch)
+    #fa = get_fuzzy_accuracy(true_labels, pred_labels)
+    #writer.add_scalar("Fa/train", fa, epoch)
 
     # save confusion matrix
     save_confusion_matrix(true_labels, pred_labels, oa_total, outdir, epoch, "train")
 
-    return loss_total, oa_total, fa
+    return loss_total
 
 
 
@@ -245,7 +252,8 @@ def validate(cfg, dataLoader, model, epoch, outdir, writer):
     # see lines 103-106 above
     model.eval()
     
-    criterion = nn.CrossEntropyLoss()   # we still need a criterion to calculate the validation loss
+    #criterion = nn.CrossEntropyLoss()   # we still need a criterion to calculate the validation loss
+    criterion = nn.MSELoss()
 
     # running averages
     loss_total, oa_total = 0.0, 0.0     # for now, we just log the loss and overall accuracy (OA)
@@ -272,34 +280,37 @@ def validate(cfg, dataLoader, model, epoch, outdir, writer):
             # log statistics
             loss_total += loss.item()
 
-            pred_label = torch.argmax(prediction, dim=1)
-            oa = torch.mean((pred_label == labels).float())
-            oa_total += oa.item()
+            #pred_label = torch.clamp(prediction, min=0, max=1)
+            #pred_label = torch.argmax(prediction, dim=1)
+            #oa = torch.mean((pred_label == labels).float())
+            
+            oa = MeanAbsolutePercentageError(prediction, labels)
+            #oa_total += oa.item()
 
             true_labels.extend(labels.numpy().tolist())
-            pred_labels.extend(pred_label.numpy().tolist())
+            pred_labels.extend(prediction.numpy().tolist())
 
             progressBar.set_description(
                 '[Val] Loss: {:.2f}; OA: {:.2f}%'.format(
                     loss_total/(idx+1),
-                    100*oa_total/(idx+1)
+                    #100*oa_total/(idx+1)
                 )
             )
             progressBar.update(1)
     
     # end of epoch; finalize
     progressBar.close()
-    loss_total /= len(dataLoader)
-    writer.add_scalar("Loss/val", loss_total, epoch)
-    oa_total /= len(dataLoader)
-    writer.add_scalar("Acc/val", oa_total, epoch)
-    fa = get_fuzzy_accuracy(true_labels, pred_labels)
-    writer.add_scalar("Fa/val", fa, epoch)
+    #loss_total /= len(dataLoader)
+    #writer.add_scalar("Loss/val", loss_total, epoch)
+    #oa_total /= len(dataLoader)
+    #writer.add_scalar("Acc/val", oa_total, epoch)
+    #fa = get_fuzzy_accuracy(true_labels, pred_labels)
+    #writer.add_scalar("Fa/val", fa, epoch)
 
     # save confusion matrix
     save_confusion_matrix(true_labels, pred_labels, oa_total, outdir, epoch, "val")
 
-    return loss_total, oa_total, fa
+    return loss_total
 
 
 
@@ -317,7 +328,8 @@ def main():
     writer = SummaryWriter(comment=cfg['experiment'])
 
    #print(f'Saving results to {cfg['experiment']}')
-    outdir = os.path.join('/datadrive/experiments/', cfg['experiment'])
+    #outdir = os.path.join('/datadrive/experiments/', cfg['experiment'])
+    outdir = os.path.join('/Users/nsi/Documents/ant-size/model_runs', cfg['experiment'])
     create_outdir(args.config, outdir)
 
     # check if GPU is available
@@ -354,17 +366,17 @@ def main():
         current_epoch += 1
         print(f'Epoch {current_epoch}/{numEpochs}')
 
-        loss_train, oa_train, fa_train = train(cfg, dl_train, model, optim, current_epoch, outdir, writer)
-        loss_val, oa_val, fa_val = validate(cfg, dl_val, model, current_epoch, outdir, writer)
+        loss_train = train(cfg, dl_train, model, optim, current_epoch, outdir, writer)
+        loss_val= validate(cfg, dl_val, model, current_epoch, outdir, writer)
 
         # combine stats and save
         stats = {
             'loss_train': loss_train,
             'loss_val': loss_val,
-            'oa_train': oa_train,
-            'oa_val': oa_val,
-            'fa_train': fa_train,
-            'fa_val': fa_val
+            #'oa_train': oa_train,
+            #'oa_val': oa_val,
+            #'fa_train': fa_train,
+            #'fa_val': fa_val
         }
         save_model(current_epoch, model, stats, outdir)
 

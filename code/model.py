@@ -6,6 +6,7 @@
 '''
 
 import torch.nn as nn
+import torch
 from torchvision.models import resnet
 
 
@@ -27,7 +28,7 @@ class CustomResNet18(nn.Module):
         self.feature_extractor.fc = nn.Identity()                       # discard last layer...
 
         self.classifier = nn.Linear(in_features, num_classes)           # ...and create a new one
-    
+
 
     def forward(self, x):
         '''
@@ -39,42 +40,7 @@ class CustomResNet18(nn.Module):
         # x.size(): [B x 3 x W x H]
         features = self.feature_extractor(x)    # features.size(): [B x 512 x W x H]
         prediction = self.classifier(features)  # prediction.size(): [B x num_classes]
-
+        prediction = torch.clamp(prediction, min=0, max=1) # to return value btwn 0 and 1
         return prediction
 
-
-class RegResNet18(nn.Module):
-
-    def __init__(self, num_classes):
-        '''
-            Constructor of the model. Here, we initialize the model's
-            architecture (layers).
-        '''
-        super(CustomResNet18, self).__init__()
-
-        self.feature_extractor = resnet.resnet18(pretrained=True)      
-
-  
-        last_layer = self.feature_extractor.fc                          # tip: print(self.feature_extractor) to get info on how model is set up
-        in_features = last_layer.in_features                            # number of input dimensions to last (classifier) layer
-        self.feature_extractor.fc = nn.Identity()                       # discard last layer...
-
-        # scale output between 0 and 1
-        self.classifier = torch.clamp(in_features, min=0, max=1)
-
-        self.classifier = nn.Linear(in_features, num_classes)           # ...and create a new one
-    
-
-    def forward(self, x):
-        '''
-            Forward pass. Here, we define how to apply our model. It's basically
-            applying our modified ResNet-18 on the input tensor ("x") and then
-            apply the final classifier layer on the ResNet-18 output to get our
-            num_classes prediction.
-        '''
-        # x.size(): [B x 3 x W x H]
-        features = self.feature_extractor(x)    # features.size(): [B x 512 x W x H]
-        prediction = self.classifier(features)  # prediction.size(): [B x num_classes]
-
-        return prediction
 
