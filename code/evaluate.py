@@ -147,6 +147,8 @@ def save_acc_plot(results, outdir):
     
     plt.savefig(outdir+'/figs/accuracy.png', facecolor="white")
 
+    plt.close()
+
 
 def save_loss_plot(results, outdir):
     os.makedirs(outdir+'/figs', exist_ok=True)
@@ -161,6 +163,8 @@ def save_loss_plot(results, outdir):
     plt.legend()
     plt.grid()
     plt.savefig(outdir+'/figs/loss.png', facecolor="white")
+
+    plt.close()
 
 
 def main():
