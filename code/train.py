@@ -199,8 +199,8 @@ def train(cfg, dataLoader, model, optimizer, epoch, outdir, writer):
         #oa = torch.mean((pred_label == labels).float()) # OA: number of correct predictions divided by batch size (i.e., average/mean)
 
         
-        mape_total = mean_absolute_percentage_error(labels, prediction.detach)
-        me_total =  max_error(labels, prediction.detach)
+        mape_total = mean_absolute_percentage_error(labels, prediction.detach())
+        me_total =  max_error(labels, prediction.detach())
 
         #oa_total += oa.item()
 
@@ -281,8 +281,8 @@ def validate(cfg, dataLoader, model, epoch, outdir, writer):
             #pred_label = torch.argmax(prediction, dim=1)
             #oa = torch.mean((pred_label == labels).float())
             
-            mape_total = mean_absolute_percentage_error(labels, prediction.detach)
-            me_total = max_error(labels, prediction.detach)
+            mape_total = mean_absolute_percentage_error(labels, prediction.detach())
+            me_total = max_error(labels, prediction.detach())
 
             #true_labels.extend(labels.numpy().tolist())
             #pred_labels.extend(prediction.numpy().tolist())
