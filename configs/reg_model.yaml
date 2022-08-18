@@ -7,7 +7,7 @@ device: cuda
 num_workers: 4
 
 # dataset parameters
-data_root: ~/data/antmass/
+data_root: /home/ubuntu/ant-size/data/antmass/
 num_classes: 1
 experiment: unb.reg
 perc_split: 0.2
