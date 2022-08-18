@@ -329,7 +329,7 @@ def main():
 
    #print(f'Saving results to {cfg['experiment']}')
     #outdir = os.path.join('/datadrive/experiments/', cfg['experiment'])
-    outdir = os.path.join('/Users/nsi/Documents/ant-size/model_runs', cfg['experiment'])
+    outdir = os.path.join('../data/model_runs', cfg['experiment'])
     create_outdir(args.config, outdir)
 
     # check if GPU is available
