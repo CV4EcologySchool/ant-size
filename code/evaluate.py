@@ -17,7 +17,8 @@ from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, accuracy_s
 import matplotlib.pyplot as plt
 from model import CustomResNet18
 
-from train import create_dataloader
+from torch.utils.data import DataLoader
+from dataset import SizeDataset
 
 def load_model(cfg, outdir, epoch=None):
     '''
@@ -209,7 +210,15 @@ def main():
 
 
     # setup dataloader
-    dl = create_dataloader(cfg, split=args.split, batch=1)
+    dataset_instance = SizeDataset(cfg, split=args.split)
+    dl = DataLoader(
+        dataset=dataset_instance,
+        batch_size=1,
+        shuffle=False,
+        num_workers=1
+    )
+    
+    
 
     # load model and predict from model
     model, epoch = load_model(cfg, outdir, args.epoch)
