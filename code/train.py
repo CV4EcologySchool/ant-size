@@ -178,6 +178,8 @@ def train(cfg, dataLoader, model, optimizer, epoch, outdir, writer):
 
         # forward pass
         prediction = model(data)
+        import IPython
+        IPython.embed()
         prediction = prediction.unsqueeze(1).float() # need to change input size
 
         # reset gradients to zero
