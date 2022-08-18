@@ -142,7 +142,7 @@ def save_confusion_matrix(y_true, y_pred, acc, outdir, epoch, split):
     disp = ConfusionMatrixDisplay(cm)
     disp.plot()
     plt.title("Accuracy: {:.2f}".format(acc))
-    plt.savefig('{}/figs/confusion_matrix_epoch{:02d}_{}.png'.format(outdir, epoch, split), facecolor="white")
+    plt.savefig('{}/figs/confusion_matrix_epoch{}_{}.png'.format(outdir, epoch, split), facecolor="white")
     plt.clf() # clear plot to reduce memory usages
     
     return cm
