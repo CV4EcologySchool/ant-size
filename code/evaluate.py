@@ -140,10 +140,11 @@ def save_acc_plot(results, outdir):
     plt.rcParams['figure.dpi'] = 300    
     plt.plot(results['epoch'], results['oa_train'], color="blue", label="train")
     plt.plot(results['epoch'], results['oa_val'], color="red", label="val")
+    plt.grid()
     plt.xlabel('epoch')
     plt.ylabel('overall accuracy')
     plt.legend()
-    plt.grid()
+    
     plt.savefig(outdir+'/figs/accuracy.png', facecolor="white")
 
 
@@ -191,6 +192,8 @@ def main():
     # dl_val = create_dataloader(cfg, split=args.split, batch=1)
 
     # load model and predict from model
+
+
     # model, epoch = load_model(cfg, outdir, args.epoch)
     # fn, predictions, predict_labels, labels = predict(dl_val, model)   
     
