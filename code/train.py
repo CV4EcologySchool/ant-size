@@ -197,8 +197,8 @@ def train(cfg, dataLoader, model, optimizer, epoch, outdir, writer):
 
         #pred_label = torch.argmax(prediction, dim=1)    # the predicted label is the one at position (class index) with highest predicted value
         #oa = torch.mean((pred_label == labels).float()) # OA: number of correct predictions divided by batch size (i.e., average/mean)
-        import IPython
-        IPython.embed()
+        #import IPython
+        #IPython.embed()
         
         mape_total = mean_absolute_percentage_error(labels, prediction.detach())
         me_total =  max_error(labels, prediction.detach())
