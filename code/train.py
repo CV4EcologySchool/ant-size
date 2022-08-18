@@ -178,15 +178,15 @@ def train(cfg, dataLoader, model, optimizer, epoch, outdir, writer):
 
         # forward pass
         prediction = model(data)
-        import IPython
-        IPython.embed()
-        prediction = prediction.unsqueeze(1).float() # need to change input size
+        #import IPython
+        #IPython.embed()
+        #prediction = prediction.unsqueeze(1).float() # need to change input size
 
         # reset gradients to zero
         optimizer.zero_grad()
 
         # loss
-        loss = criterion(prediction, labels.float())
+        loss = criterion(prediction, labels.unsqueeze(1))
 
         # backward pass (calculate gradients of current batch)
         loss.backward()
