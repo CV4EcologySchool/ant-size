@@ -275,7 +275,7 @@ def validate(cfg, dataLoader, model, epoch, outdir, writer):
             prediction = model(data)
 
             # loss
-            loss = criterion(prediction, labels)
+            loss = criterion(prediction.float(), labels.unsqueeze(1).float())
 
             # log statistics
             loss_total += loss.item()
