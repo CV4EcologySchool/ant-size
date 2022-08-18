@@ -1,0 +1,30 @@
+# Here's where you define experiment-specific hyperparameters.
+# You can also create lists and group parameters together into nested sub-parts.
+# In Python, this is all read as a dict.
+
+# environment/computational parameters
+device: cuda
+num_workers: 4
+
+# dataset parameters
+data_root: /datadrive/antmass/
+num_classes: 1
+experiment: unb.reg
+perc_split: 0.2
+
+# training hyperparameters
+image_size: [128, 128]
+num_epochs: 300
+batch_size: 128
+learning_rate: 0.001
+weight_decay: 0.001
+
+# augmentation hyperparameters
+rotate_deg: 360
+flip_prob: 0.5
+sepia_prob: 0.1
+color_jitter: 0.1
+dropout: 0.1
+noise: 0.1
+sepia: 0.1
+
