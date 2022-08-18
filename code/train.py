@@ -187,7 +187,7 @@ def train(cfg, dataLoader, model, optimizer, epoch, outdir, writer):
         optimizer.zero_grad()
 
         # loss
-        loss = criterion(prediction, labels)
+        loss = criterion(prediction.float(), labels.float())
 
         # backward pass (calculate gradients of current batch)
         import IPython
