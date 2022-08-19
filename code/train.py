@@ -177,8 +177,8 @@ def train(cfg, dataLoader, model, optimizer, epoch, outdir, writer):
         labels = labels.type(torch.float32)
         data, labels = data.to(device), labels.to(device)
 
-        import IPython
-        IPython.embed()
+        #import IPython
+        #IPython.embed()
 
         # forward pass
         for counter in tqdm.tqdm(list(range(100))):
