@@ -26,7 +26,7 @@ class CustomResNet18(nn.Module):
         last_layer = self.feature_extractor.fc                          # tip: print(self.feature_extractor) to get info on how model is set up
         in_features = last_layer.in_features                            # number of input dimensions to last (classifier) layer
         self.feature_extractor.fc = nn.Identity()                       # discard last layer...
-
+        self.activation = torch.nn.Sigmoid()
         self.classifier = nn.Linear(in_features, num_classes)           # ...and create a new one
 
 
@@ -40,10 +40,7 @@ class CustomResNet18(nn.Module):
         # x.size(): [B x 3 x W x H]
         features = self.feature_extractor(x)    # features.size(): [B x 512 x W x H]
         prediction = self.classifier(features)  # prediction.size(): [B x num_classes]
-        import IPython
-        IPython.embed()
-        prediction = prediction.detach()
-        prediction = torch.nn.Sigmoid(prediction) - 0.5 # to return value btwn 0 and 1
+        prediction = self.activtion(prediction) - 0.5 # to return value btwn 0 and 1
         return prediction
 
 
