@@ -40,6 +40,7 @@ class CustomResNet18(nn.Module):
         # x.size(): [B x 3 x W x H]
         features = self.feature_extractor(x)    # features.size(): [B x 512 x W x H]
         prediction = self.classifier(features)  # prediction.size(): [B x num_classes]
+        prediction = prediction.detach()
         prediction = torch.nn.Sigmoid(prediction) - 0.5 # to return value btwn 0 and 1
         return prediction
 
