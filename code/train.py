@@ -191,6 +191,7 @@ def train(cfg, dataLoader, model, optimizer, epoch, outdir, writer):
             # loss
             # loss = criterion(prediction, labels)
             loss = torch.mean(torch.sqrt((prediction - labels) ** 2 + (labels - prediction) ** 2))
+            loss *= 0.001
             print(loss)
             print(torch.min(prediction))
             print(torch.mean(prediction))
