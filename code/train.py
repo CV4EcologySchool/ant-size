@@ -174,7 +174,7 @@ def train(cfg, dataLoader, model, optimizer, epoch, outdir, writer):
         #step = idx + (epoch - 1)*idx
 
         # put data and labels on device
-        labels = labels.type(torch.float32).unsqueeze(1)
+        labels = labels.type(torch.float32)
         data, labels = data.to(device), labels.to(device)
 
         import IPython
@@ -210,7 +210,7 @@ def train(cfg, dataLoader, model, optimizer, epoch, outdir, writer):
         #import IPython
         #IPython.embed()
         
-        mape_total = mean_absolute_percentage_error(labels, prediction.detach())
+        mape_total = mean_absolute_percentage_error(labels, prediction)
         me_total =  max_error(labels, prediction.detach())
 
         #oa_total += oa.item()
