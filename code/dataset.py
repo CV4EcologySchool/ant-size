@@ -172,7 +172,9 @@ class RegDataset(Dataset):
         df.reset_index()
 
         # multiply by 1000 to convert to mg
-        df['m_scaled'] = (df['mass']*1000)/(df['mass'].max()*1000 + 10)
+        df['mass'] *= 1000
+        df['m_scaled'] = df['mass'] / (df['mass'].max() + 10)
+        df['m_scaled'] -= df['mass'].mean()
 
         #self.data.append([str(df['filename']), m_scaled])
 

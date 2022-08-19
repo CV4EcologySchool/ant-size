@@ -174,25 +174,32 @@ def train(cfg, dataLoader, model, optimizer, epoch, outdir, writer):
         #step = idx + (epoch - 1)*idx
 
         # put data and labels on device
+        labels = labels.type(torch.float32).unsqueeze(1)
         data, labels = data.to(device), labels.to(device)
 
-        # forward pass
-        prediction = model(data)
         import IPython
         IPython.embed()
-        #prediction = prediction.unsqueeze(1).float() # need to change input size
 
-        # reset gradients to zero
-        optimizer.zero_grad()
+        # forward pass
+        for counter in tqdm.tqdm(list(range(100))):
+            prediction = model(data)
+            #prediction = prediction.unsqueeze(1).float() # need to change input size
 
-        # loss
-        loss = criterion(prediction.float(), labels.unsqueeze(1).float())
+            # reset gradients to zero
+            optimizer.zero_grad()
 
-        # backward pass (calculate gradients of current batch)
-        loss.backward()
+            # loss
+            # loss = criterion(prediction, labels)
+            loss = torch.mean(torch.sqrt((prediction - labels) ** 2 + (labels - prediction) ** 2))
+            print(loss)
+            print(torch.min(prediction))
+            print(torch.mean(prediction))
+            print(torch.max(prediction))
+            # backward pass (calculate gradients of current batch)
+            loss.backward()
 
-        # apply gradients to model parameters
-        optimizer.step()
+            # apply gradients to model parameters
+            optimizer.step()
 
         # log statistics
         loss_total += loss.item()                       # the .item() command retrieves the value of a single-valued tensor, regardless of its data type and device of tensor
