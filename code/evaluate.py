@@ -236,8 +236,8 @@ def main():
     cm = save_confusion_matrix(labels, predict_labels, acc, outdir, epoch, args.split)
 
     # save list of predictions with filename
-    df = create_results(fn, predictions, labels, predict_labels)
-    df.to_csv(outdir+'/results_epoch'+str(epoch)+'_'+str(args.split)+'.csv', index = False)
+    #df = create_results(fn, predictions, labels, predict_labels)
+    #df.to_csv(outdir+'/results_epoch'+str(epoch)+'_'+str(args.split)+'.csv', index = False)
 
     # precision recall curve
 
